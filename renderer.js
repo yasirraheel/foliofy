@@ -257,9 +257,10 @@ const PortfolioRenderer = {
         </div>
       </div>`;
 
-    const bar   = document.getElementById('projectsShowMoreBar');
-    const btn   = document.getElementById('projectsShowMoreBtn');
-    const label = document.getElementById('projectsShowMoreLabel');
+    const bar = document.getElementById('projectsShowMoreBar');
+    const btn = document.getElementById('projectsShowMoreBtn');
+    // NOTE: label is NOT cached here — it gets a fresh lookup inside render()
+    // because the button is cloned later (to reset listeners), which creates a new span.
 
     const render = () => {
       // Determine which filter is active
@@ -277,9 +278,13 @@ const PortfolioRenderer = {
       if (bar) {
         const showBar = isMobile() && remaining > 0;
         bar.style.display = showBar ? 'flex' : 'none';
-        if (label && showBar) {
-          const next = Math.min(PAGE, remaining);
-          label.textContent = `Show ${next} More  (${remaining} remaining)`;
+        if (showBar) {
+          // Fresh lookup every render so we always hit the live DOM node
+          const lbl = document.getElementById('projectsShowMoreLabel');
+          if (lbl) {
+            const next = Math.min(PAGE, remaining);
+            lbl.textContent = `Show ${next} More (${remaining} remaining)`;
+          }
         }
       }
     };
