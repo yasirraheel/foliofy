@@ -7,7 +7,7 @@
 
 const PORTFOLIO_KEY = 'am_portfolio_v1';
 const DATA_VERSION_KEY = 'am_portfolio_version';
-const DATA_VERSION = 5; // Bumped: force local storage reset to load all 52 sync'd GitHub projects
+const DATA_VERSION = 6; // Bumped: clear corrupted saved arrays
 
 // Auto-clear stale data from old version (e.g., "Alex Morgan" defaults)
 (function migrateData() {

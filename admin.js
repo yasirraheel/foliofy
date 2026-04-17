@@ -623,6 +623,15 @@ function val(id) { const el = $(id); return el ? el.value : ''; }
 ══════════════════════════════════════ */
 function saveAll() {
   collectDraft();
+
+  // IMPORTANT: Since the admin panel currently doesn't manage these arrays,
+  // we delete them from the local storage save payload. This ensures that any
+  // programmatic updates pushed via data.js (like github repos) will ALWAYS 
+  // load properly instead of being overwritten by an older cached array.
+  delete draft.projects;
+  delete draft.skills;
+  delete draft.experience;
+
   const ok = PortfolioData.save(draft);
   if (ok) {
     toast('All changes saved! Open your portfolio to see them live.', 'success');
