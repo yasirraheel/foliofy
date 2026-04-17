@@ -351,7 +351,44 @@ function initSwiper() {
 }
 
 /* ─── 12. CONTACT FORM ─── */
-(function initContactForm() {
+  // ── Math Captcha ──
+  let _captchaAnswer = 0;
+
+  function generateCaptcha() {
+    const ops = ['+', '-', '×'];
+    const op  = ops[Math.floor(Math.random() * ops.length)];
+    let a, b, answer;
+
+    if (op === '+')      { a = rand(1,20); b = rand(1,20); answer = a + b; }
+    else if (op === '-') { a = rand(5,20); b = rand(1, a); answer = a - b; }
+    else                 { a = rand(2, 9); b = rand(2, 9); answer = a * b; }
+
+    _captchaAnswer = answer;
+
+    const n1 = document.getElementById('captchaNum1');
+    const n2 = document.getElementById('captchaNum2');
+    const op2 = document.getElementById('captchaOp');
+    const ans = document.getElementById('captchaAnswer');
+    const err = document.getElementById('captchaError');
+
+    if (n1) n1.textContent = a;
+    if (n2) n2.textContent = b;
+    if (op2) op2.textContent = op;
+    if (ans) ans.value = '';
+    if (err) err.style.display = 'none';
+  }
+
+  function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+  generateCaptcha();
+  const refreshBtn = document.getElementById('captchaRefresh');
+  if (refreshBtn) refreshBtn.addEventListener('click', () => {
+    generateCaptcha();
+    const ans = document.getElementById('captchaAnswer');
+    if (ans) { ans.style.borderColor = ''; ans.focus(); }
+  });
+
+
   const form    = document.getElementById('contactForm');
   const success = document.getElementById('formSuccess');
   const btn     = document.getElementById('submitBtn');
@@ -368,6 +405,18 @@ function initSwiper() {
     });
 
     if (!valid) return;
+
+    // Validate captcha
+    const captchaInput = document.getElementById('captchaAnswer');
+    const captchaErr   = document.getElementById('captchaError');
+    const userAnswer   = parseInt(captchaInput?.value, 10);
+    if (isNaN(userAnswer) || userAnswer !== _captchaAnswer) {
+      if (captchaInput) captchaInput.style.borderColor = '#f43f5e';
+      if (captchaErr)   captchaErr.style.display = 'block';
+      generateCaptcha(); // new question on failure
+      return;
+    }
+    if (captchaErr) captchaErr.style.display = 'none';
 
     // Collect form data
     const name    = (form.querySelector('#contactName')    || form.querySelector('[name="name"]'))?.value.trim()    || '';
@@ -418,6 +467,7 @@ function initSwiper() {
     btn.querySelector('.btn-text').textContent = 'Send Message';
     btn.style.opacity = '1';
     form.reset();
+    generateCaptcha(); // fresh question for next visitor
     success.classList.add('show');
     setTimeout(() => success.classList.remove('show'), 5000);
   });

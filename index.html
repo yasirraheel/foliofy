@@ -831,6 +831,28 @@
                 <textarea id="contactMessage" name="message" rows="5" placeholder="Tell me about your project..." required></textarea>
               </div>
             </div>
+
+            <!-- Math Captcha -->
+            <div class="form-group captcha-group">
+              <label>Quick Verification <span class="captcha-hint">Prove you're human 🤖</span></label>
+              <div class="captcha-wrap">
+                <div class="captcha-question" id="captchaQuestion">
+                  <span id="captchaNum1"></span>
+                  <span class="captcha-op" id="captchaOp"></span>
+                  <span id="captchaNum2"></span>
+                  <span class="captcha-eq">=</span>
+                </div>
+                <div class="input-wrap captcha-input-wrap">
+                  <i class="fas fa-calculator"></i>
+                  <input type="number" id="captchaAnswer" placeholder="Your answer" autocomplete="off" />
+                </div>
+                <button type="button" class="captcha-refresh" id="captchaRefresh" title="New question">
+                  <i class="fas fa-sync-alt"></i>
+                </button>
+              </div>
+              <p class="captcha-error" id="captchaError" style="display:none">❌ Wrong answer — try the new question!</p>
+            </div>
+
             <button type="submit" class="btn btn-primary btn-full" id="submitBtn">
               <span class="btn-text">Send Message</span>
               <i class="fas fa-paper-plane"></i>
