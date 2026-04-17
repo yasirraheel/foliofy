@@ -7,7 +7,7 @@
 
 const PORTFOLIO_KEY = 'am_portfolio_v1';
 const DATA_VERSION_KEY = 'am_portfolio_version';
-const DATA_VERSION = 6; // Bumped: clear corrupted saved arrays
+const DATA_VERSION = 7; // Bumped: clear old admin panel draft memory corruption
 
 // Auto-clear stale data from old version (e.g., "Alex Morgan" defaults)
 (function migrateData() {
