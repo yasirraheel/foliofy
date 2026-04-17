@@ -551,12 +551,14 @@ function initItemTags(listId, inputId, addBtnId, tags, onChange) {
    10. COLLECT FORM DATA → DRAFT
 ══════════════════════════════════════ */
 function collectDraft() {
-  // META
+  // META — ensure meta object exists before writing
+  if (!draft.meta) draft.meta = {};
   draft.meta.name      = val('metaName');
   draft.meta.role      = val('metaRole');
-  draft.meta.brandText = val('metaBrandText');
+  draft.meta.brandText = val('metaBrandText') || draft.meta.brandText || 'MAS';
   draft.meta.siteTitle = val('metaSiteTitle');
   draft.meta.siteDesc  = val('metaSiteDesc');
+  if (!draft.footer) draft.footer = {};
   draft.footer.tagline = val('footerTagline');
 
   // HERO
@@ -617,6 +619,15 @@ function saveAll() {
    12. SETTINGS — CHANGE PASSWORD
 ══════════════════════════════════════ */
 function initSettings() {
+  // Live-sync brand text directly into draft so it's always captured at save time
+  const brandInput = $('metaBrandText');
+  if (brandInput) {
+    brandInput.addEventListener('input', () => {
+      if (!draft.meta) draft.meta = {};
+      draft.meta.brandText = brandInput.value.trim();
+    });
+  }
+
   $('changePwdBtn').addEventListener('click', () => {
     const cur  = $('currentPwd').value;
     const nw   = $('newPwd').value;
