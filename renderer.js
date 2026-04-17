@@ -29,8 +29,14 @@ const PortfolioRenderer = {
   renderMeta() {
     const { meta } = this.data;
     document.title = meta.siteTitle;
-    const d = document.querySelector('meta[name="description"]');
-    if (d) d.setAttribute('content', meta.siteDesc);
+    
+    // Standard and Open Graph Descriptions
+    const descTags = document.querySelectorAll('meta[name="description"], meta[property="og:description"], meta[property="twitter:description"]');
+    descTags.forEach(tag => tag.setAttribute('content', meta.siteDesc));
+
+    // Open Graph Titles
+    const titleTags = document.querySelectorAll('meta[property="og:title"], meta[property="twitter:title"]');
+    titleTags.forEach(tag => tag.setAttribute('content', meta.siteTitle));
 
     // Update brand initials in navbar logo and loader
     // Priority: explicit brandText > auto-initials from name > fallback
