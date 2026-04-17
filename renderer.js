@@ -236,9 +236,9 @@ const PortfolioRenderer = {
     const grid = document.getElementById('projectsGrid');
     if (!grid) return;
 
-    const PAGE       = 4;  // cards per "Show More" click
     const isMobile   = () => window.innerWidth <= 768;
-    let   visibleCnt = isMobile() ? PAGE : projects.length;
+    const page       = () => isMobile() ? 4 : 6;  // 4 on mobile, 6 on desktop
+    let   visibleCnt = page();
 
     // Build one card's HTML
     const cardHTML = (p, i) => `
@@ -259,30 +259,26 @@ const PortfolioRenderer = {
 
     const bar = document.getElementById('projectsShowMoreBar');
     const btn = document.getElementById('projectsShowMoreBtn');
-    // NOTE: label is NOT cached here — it gets a fresh lookup inside render()
-    // because the button is cloned later (to reset listeners), which creates a new span.
+    // NOTE: label is NOT cached — fresh lookup inside render() avoids stale ref after button clone.
 
     const render = () => {
-      // Determine which filter is active
       const activeFilter = document.querySelector('.filter-btn.active')?.getAttribute('data-filter') || 'all';
       const filtered = activeFilter === 'all'
         ? projects
         : projects.filter(p => p.category === activeFilter);
 
-      const slice    = filtered.slice(0, visibleCnt);
-      const remaining = filtered.length - visibleCnt;
+      const slice     = filtered.slice(0, visibleCnt);
+      const remaining = Math.max(0, filtered.length - visibleCnt);
 
       grid.innerHTML = slice.map((p, i) => cardHTML(p, i)).join('');
 
-      // Show / hide "Show More" bar — only on mobile and only if there are hidden cards
+      // Show / hide "Show More" bar on ALL screen sizes
       if (bar) {
-        const showBar = isMobile() && remaining > 0;
-        bar.style.display = showBar ? 'flex' : 'none';
-        if (showBar) {
-          // Fresh lookup every render so we always hit the live DOM node
+        bar.style.display = remaining > 0 ? 'flex' : 'none';
+        if (remaining > 0) {
           const lbl = document.getElementById('projectsShowMoreLabel');
           if (lbl) {
-            const next = Math.min(PAGE, remaining);
+            const next = Math.min(page(), remaining);
             lbl.textContent = `Show ${next} More (${remaining} remaining)`;
           }
         }
@@ -291,37 +287,31 @@ const PortfolioRenderer = {
 
     render();
 
-    // "Show More" click — reveal next PAGE cards
+    // "Show More" click — reveal next page() cards
     if (btn) {
-      // Remove any previous listener by cloning
       const fresh = btn.cloneNode(true);
       btn.parentNode.replaceChild(fresh, btn);
       document.getElementById('projectsShowMoreBtn').addEventListener('click', () => {
-        visibleCnt += PAGE;
+        visibleCnt += page();
         render();
-        // Re-initialise AOS for newly added cards
         if (window.AOS) AOS.refresh();
       });
     }
 
-    // Re-render on filter change so visibleCnt resets to PAGE on mobile
+    // Filter change — reset visible count to per-screen PAGE
     document.querySelectorAll('.filter-btn').forEach(fb => {
       fb.addEventListener('click', () => {
-        if (isMobile()) visibleCnt = PAGE;
+        visibleCnt = page();
         render();
         if (window.AOS) AOS.refresh();
       });
     });
 
-    // Re-evaluate on window resize (portrait ↔ landscape)
+    // Resize — recalculate PAGE and re-render only if needed
     window.addEventListener('resize', () => {
-      if (!isMobile()) {
-        visibleCnt = projects.length; render();
-      } else if (visibleCnt > PAGE) {
-        // keep current count, just update button label
-      } else {
-        visibleCnt = PAGE; render();
-      }
+      const p = page();
+      if (visibleCnt < p) { visibleCnt = p; render(); }
+      else render(); // just update button label / visibility
     }, { passive: true });
   },
 
