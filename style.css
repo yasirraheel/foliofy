@@ -121,6 +121,7 @@ body.cursor-hover .cursor-inner { width: 4px; height: 4px; }
   position: relative;
   width: 200px; height: 200px;
   display: flex; align-items: center; justify-content: center;
+  animation: float 3s ease-in-out infinite;
 }
 .loader-ring-outer::before, .loader-ring-outer::after {
   content: ''; position: absolute; border-radius: 50%;
@@ -135,7 +136,6 @@ body.cursor-hover .cursor-inner { width: 4px; height: 4px; }
   padding: 3px;
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 0 50px hsla(250,84%,65%,0.45);
-  animation: float 3s ease-in-out infinite;
   font-family: 'JetBrains Mono', monospace;
   font-size: 1.1rem; font-weight: 700; color: #fff;
   gap: 2px;
@@ -362,6 +362,7 @@ body.cursor-hover .cursor-inner { width: 4px; height: 4px; }
 .profile-ring-outer {
   position: relative; width: 420px; height: 420px;
   display: flex; align-items: center; justify-content: center;
+  animation: float 6s ease-in-out infinite;
 }
 .profile-ring-outer::before, .profile-ring-outer::after {
   content: ''; position: absolute; border-radius: 50%;
@@ -375,7 +376,6 @@ body.cursor-hover .cursor-inner { width: 4px; height: 4px; }
   background: var(--gradient-primary);
   padding: 4px;
   box-shadow: var(--shadow-glow);
-  animation: float 6s ease-in-out infinite;
 }
 @keyframes float {
   0%, 100% { transform: translateY(0); }
