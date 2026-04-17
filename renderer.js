@@ -235,7 +235,13 @@ const PortfolioRenderer = {
     const { projects } = this.data;
     const grid = document.getElementById('projectsGrid');
     if (!grid) return;
-    grid.innerHTML = projects.map((p, i) => `
+
+    const PAGE       = 4;  // cards per "Show More" click
+    const isMobile   = () => window.innerWidth <= 768;
+    let   visibleCnt = isMobile() ? PAGE : projects.length;
+
+    // Build one card's HTML
+    const cardHTML = (p, i) => `
       <div class="project-card" data-category="${p.category}" data-aos="fade-up" data-aos-delay="${(i % 3 + 1) * 100}">
         <div class="project-image">
           <div class="project-img-placeholder ${p.gradient}"><i class="${p.icon}"></i></div>
@@ -249,7 +255,69 @@ const PortfolioRenderer = {
           <h3 class="project-title">${p.title}</h3>
           <p class="project-desc">${p.desc}</p>
         </div>
-      </div>`).join('');
+      </div>`;
+
+    const bar   = document.getElementById('projectsShowMoreBar');
+    const btn   = document.getElementById('projectsShowMoreBtn');
+    const label = document.getElementById('projectsShowMoreLabel');
+
+    const render = () => {
+      // Determine which filter is active
+      const activeFilter = document.querySelector('.filter-btn.active')?.getAttribute('data-filter') || 'all';
+      const filtered = activeFilter === 'all'
+        ? projects
+        : projects.filter(p => p.category === activeFilter);
+
+      const slice    = filtered.slice(0, visibleCnt);
+      const remaining = filtered.length - visibleCnt;
+
+      grid.innerHTML = slice.map((p, i) => cardHTML(p, i)).join('');
+
+      // Show / hide "Show More" bar — only on mobile and only if there are hidden cards
+      if (bar) {
+        const showBar = isMobile() && remaining > 0;
+        bar.style.display = showBar ? 'flex' : 'none';
+        if (label && showBar) {
+          const next = Math.min(PAGE, remaining);
+          label.textContent = `Show ${next} More  (${remaining} remaining)`;
+        }
+      }
+    };
+
+    render();
+
+    // "Show More" click — reveal next PAGE cards
+    if (btn) {
+      // Remove any previous listener by cloning
+      const fresh = btn.cloneNode(true);
+      btn.parentNode.replaceChild(fresh, btn);
+      document.getElementById('projectsShowMoreBtn').addEventListener('click', () => {
+        visibleCnt += PAGE;
+        render();
+        // Re-initialise AOS for newly added cards
+        if (window.AOS) AOS.refresh();
+      });
+    }
+
+    // Re-render on filter change so visibleCnt resets to PAGE on mobile
+    document.querySelectorAll('.filter-btn').forEach(fb => {
+      fb.addEventListener('click', () => {
+        if (isMobile()) visibleCnt = PAGE;
+        render();
+        if (window.AOS) AOS.refresh();
+      });
+    });
+
+    // Re-evaluate on window resize (portrait ↔ landscape)
+    window.addEventListener('resize', () => {
+      if (!isMobile()) {
+        visibleCnt = projects.length; render();
+      } else if (visibleCnt > PAGE) {
+        // keep current count, just update button label
+      } else {
+        visibleCnt = PAGE; render();
+      }
+    }, { passive: true });
   },
 
   /* ── EXPERIENCE ── */
