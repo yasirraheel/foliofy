@@ -64,10 +64,9 @@ if (!move_uploaded_file($file['tmp_name'], $destPath)) {
 $imageKey = $_POST['imageKey'] ?? '';
 if ($imageKey === 'hero' || $imageKey === '') {
     @copy($destPath, __DIR__ . '/profile.png');
-    @copy($destPath, __DIR__ . '/og-image.png'); // clean URL for WhatsApp/social OG
 }
 if ($imageKey === 'about') {
-    @copy($destPath, __DIR__ . '/profile.png');
+    @copy($destPath, __DIR__ . '/profile.png'); // same photo used for about too
 }
 
 // Optionally delete old uploaded image for the same slot (key passed in POST)
