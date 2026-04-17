@@ -41,6 +41,48 @@ const PortfolioRenderer = {
           : 'AM');
     document.querySelectorAll('.logo-name').forEach(el => el.textContent = initials);
     document.querySelectorAll('.loader-text').forEach(el => el.textContent = initials);
+
+    // Generate a canvas-based favicon from the brand text
+    this._setTextFavicon(initials);
+  },
+
+  /** Draws brand text onto a 64x64 canvas and sets it as the page favicon */
+  _setTextFavicon(text) {
+    try {
+      const size = 64;
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = size;
+      const ctx = canvas.getContext('2d');
+
+      // Background: match the portfolio primary gradient
+      const grad = ctx.createLinearGradient(0, 0, size, size);
+      grad.addColorStop(0, 'hsl(250,84%,65%)');
+      grad.addColorStop(1, 'hsl(195,95%,55%)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.roundRect(0, 0, size, size, 14);
+      ctx.fill();
+
+      // Text
+      const fontSize = text.length > 2 ? 20 : 26;
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `700 ${fontSize}px "Outfit", Arial, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, size / 2, size / 2);
+
+      // Set or replace favicon <link>
+      let link = document.querySelector('link[rel~="icon"]');
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = 'icon';
+        document.head.appendChild(link);
+      }
+      link.type = 'image/png';
+      link.href = canvas.toDataURL('image/png');
+    } catch (e) {
+      // Non-critical — silently ignore if canvas is unavailable
+    }
   },
 
   /* ── HERO ── */
