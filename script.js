@@ -494,6 +494,6 @@ document.getElementById('downloadCV')?.addEventListener('click', (e) => {
   // Simulates download — replace with actual CV path
   const link = document.createElement('a');
   link.href  = '#'; // Replace with: './assets/cv.pdf'
-  link.download = 'Alex_Morgan_CV.pdf';
+  link.download = 'Muhammad_Asif_Shabbir_CV.pdf';
   link.click();
 });

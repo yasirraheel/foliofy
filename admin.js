@@ -112,6 +112,7 @@ function populateForms() {
   /* META / SETTINGS */
   setValue('metaName',      d.meta?.name);
   setValue('metaRole',      d.meta?.role);
+  setValue('metaBrandText', d.meta?.brandText);
   setValue('metaSiteTitle', d.meta?.siteTitle);
   setValue('metaSiteDesc',  d.meta?.siteDesc);
   setValue('footerTagline', d.footer?.tagline);
@@ -553,6 +554,7 @@ function collectDraft() {
   // META
   draft.meta.name      = val('metaName');
   draft.meta.role      = val('metaRole');
+  draft.meta.brandText = val('metaBrandText');
   draft.meta.siteTitle = val('metaSiteTitle');
   draft.meta.siteDesc  = val('metaSiteDesc');
   draft.footer.tagline = val('footerTagline');

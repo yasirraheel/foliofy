@@ -31,6 +31,16 @@ const PortfolioRenderer = {
     document.title = meta.siteTitle;
     const d = document.querySelector('meta[name="description"]');
     if (d) d.setAttribute('content', meta.siteDesc);
+
+    // Update brand initials in navbar logo and loader
+    // Priority: explicit brandText > auto-initials from name > fallback
+    const initials = meta.brandText
+      ? meta.brandText.trim()
+      : (meta.name
+          ? meta.name.trim().split(/\s+/).map(w => w[0]).slice(0, 3).join('').toUpperCase()
+          : 'AM');
+    document.querySelectorAll('.logo-name').forEach(el => el.textContent = initials);
+    document.querySelectorAll('.loader-text').forEach(el => el.textContent = initials);
   },
 
   /* ── HERO ── */
@@ -124,8 +134,8 @@ const PortfolioRenderer = {
         <div class="project-image">
           <div class="project-img-placeholder ${p.gradient}"><i class="${p.icon}"></i></div>
           <div class="project-overlay">
-            <a href="${p.liveUrl || '#'}" class="project-link" aria-label="Live Demo"><i class="fas fa-external-link-alt"></i></a>
-            <a href="${p.githubUrl || '#'}" class="project-link" aria-label="GitHub"><i class="fab fa-github"></i></a>
+            <a href="${p.liveUrl || '#'}" class="project-link" aria-label="Live Demo" target="_blank" rel="noopener noreferrer"><i class="fas fa-external-link-alt"></i></a>
+            <a href="${p.githubUrl || '#'}" class="project-link" aria-label="GitHub" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"></i></a>
           </div>
         </div>
         <div class="project-body">
@@ -141,8 +151,9 @@ const PortfolioRenderer = {
     const { experience } = this.data;
     const container = document.querySelector('.timeline-container');
     if (!container) return;
+    // Use a simple left-aligned timeline to avoid direction:rtl layout issues on all screen sizes
     container.innerHTML = experience.map((item, i) => `
-      <div class="timeline-item" data-aos="${i % 2 === 0 ? 'fade-right' : 'fade-left'}" data-aos-delay="${(i + 1) * 100}">
+      <div class="timeline-item timeline-item--${i % 2 === 0 ? 'left' : 'right'}" data-aos="fade-up" data-aos-delay="${(i + 1) * 100}">
         <div class="timeline-dot"><i class="${item.iconClass}"></i></div>
         <div class="timeline-card">
           <div class="timeline-header">
