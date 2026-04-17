@@ -81,6 +81,9 @@
         <i class="fas fa-envelope"></i><span>Contact</span>
       </button>
       <div class="nav-divider"><span>System</span></div>
+      <button class="nav-item" data-panel="inbox" id="navInbox">
+        <i class="fas fa-bell"></i><span>Inbox <span class="inbox-badge" id="inboxBadge" style="display:none"></span></span>
+      </button>
       <button class="nav-item" data-panel="settings" id="navSettings">
         <i class="fas fa-cog"></i><span>Settings</span>
       </button>
@@ -389,6 +392,41 @@
             <input type="url" id="socialInstagram" placeholder="https://instagram.com/..." />
           </div>
         </div>
+
+        <div class="section-divider"><span><i class="fab fa-whatsapp"></i> WhatsApp Notification API</span></div>
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label>Enable WhatsApp Notifications
+              <span class="hint">Send a WhatsApp message to your number every time someone submits the contact form</span>
+            </label>
+            <label class="toggle-switch">
+              <input type="checkbox" id="waEnabled" />
+              <span class="toggle-slider"></span>
+              <span class="toggle-label" id="waEnabledLabel">Disabled</span>
+            </label>
+          </div>
+          <div class="form-group">
+            <label>API Key <span class="hint">Your X-Api-Key from wa-server</span></label>
+            <input type="password" id="waApiKey" placeholder="Enter your API key" autocomplete="off" />
+          </div>
+          <div class="form-group">
+            <label>Account Name <span class="hint">"account_name" from your WA session</span></label>
+            <input type="text" id="waAccountName" placeholder="e.g. My Marketing Account" />
+          </div>
+          <div class="form-group full-width">
+            <label>Your WhatsApp Number <span class="hint">Number to RECEIVE notifications — with country code, no spaces or + (e.g. 923001234567)</span></label>
+            <input type="text" id="waTargetNumber" placeholder="e.g. 923001234567" />
+          </div>
+        </div>
+      </div>
+
+      <!-- ── INBOX PANEL ── -->
+      <div class="panel" id="panel-inbox">
+        <div class="panel-header">
+          <h2 class="panel-title">Messages Inbox</h2>
+          <p class="panel-subtitle">All contact form submissions from your portfolio visitors</p>
+        </div>
+        <div id="inboxContainer"><p class="inbox-empty"><i class="fas fa-inbox"></i><br>No messages yet. When visitors submit the contact form, they appear here.</p></div>
       </div>
 
       <!-- ── SETTINGS PANEL ── -->
@@ -456,7 +494,7 @@
   </div>
 </div>
 
-<script src="data.js?v=5"></script>
-<script src="admin.js?v=5"></script>
+<script src="data.js?v=8"></script>
+<script src="admin.js?v=8"></script>
 </body>
 </html>

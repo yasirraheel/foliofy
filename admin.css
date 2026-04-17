@@ -740,3 +740,48 @@ input[type="file"]#aboutImageInput { display: none; }
   background: rgba(124,58,237,0.1); border: 1px solid rgba(124,58,237,0.2);
   padding: 3px 8px; border-radius: 6px;
 }
+
+/* --------------------------------------------
+   INBOX PANEL STYLES
+-------------------------------------------- */
+.inbox-empty, .inbox-loading {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-muted, #888);
+  font-size: 1rem;
+  line-height: 2.2;
+}
+.inbox-empty i, .inbox-loading i { font-size: 2rem; display: block; margin-bottom: .5rem; }
+.inbox-card {
+  background: var(--card-bg, #1a1a2e);
+  border: 1px solid var(--border, rgba(124,58,237,.18));
+  border-radius: 12px;
+  padding: 1.2rem 1.4rem;
+  margin-bottom: 1rem;
+  transition: box-shadow .2s;
+}
+.inbox-card:hover { box-shadow: 0 4px 24px rgba(124,58,237,.12); }
+.inbox-card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; margin-bottom: .6rem; }
+.inbox-meta { display: flex; flex-wrap: wrap; gap: .7rem; }
+.inbox-name  { font-weight: 600; color: var(--text, #e2e8f0); }
+.inbox-email { font-size: .85rem; color: #7c3aed; }
+.inbox-time  { font-size: .78rem; color: var(--text-muted, #888); white-space: nowrap; }
+.inbox-subject { font-size: .88rem; margin-bottom: .5rem; color: var(--text, #e2e8f0); }
+.inbox-message { font-size: .9rem; color: var(--text-muted, #aaa); white-space: pre-wrap; border-left: 3px solid #7c3aed; padding-left: .8rem; margin: .5rem 0 .8rem; }
+.inbox-actions { display: flex; gap: .6rem; align-items: center; }
+.btn-reply { display: inline-flex; align-items: center; gap: .4rem; padding: .45rem 1rem; border-radius: 8px; background: linear-gradient(135deg,#7c3aed,#06b6d4); color: #fff; font-size: .82rem; font-weight: 600; text-decoration: none; transition: opacity .2s; }
+.btn-reply:hover { opacity: .85; }
+.btn-delete-msg { margin-left: auto; background: rgba(244,63,94,.12); border: 1px solid rgba(244,63,94,.3); color: #f43f5e; border-radius: 8px; padding: .4rem .75rem; cursor: pointer; transition: background .2s; }
+.btn-delete-msg:hover { background: rgba(244,63,94,.25); }
+.inbox-badge { background: #f43f5e; color: #fff; border-radius: 999px; font-size: .7rem; font-weight: 700; padding: .15rem .45rem; vertical-align: middle; }
+
+/* --------------------------------------------
+   TOGGLE SWITCH STYLES
+-------------------------------------------- */
+.toggle-switch { display: inline-flex; align-items: center; gap: .8rem; cursor: pointer; user-select: none; margin-top: .4rem; }
+.toggle-switch input { display: none; }
+.toggle-slider { position: relative; width: 48px; height: 26px; background: rgba(124,58,237,.2); border-radius: 999px; transition: background .25s; flex-shrink: 0; }
+.toggle-slider::after { content:''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; background: #fff; border-radius: 50%; transition: transform .25s; }
+.toggle-switch input:checked ~ .toggle-slider { background: linear-gradient(135deg,#7c3aed,#06b6d4); }
+.toggle-switch input:checked ~ .toggle-slider::after { transform: translateX(22px); }
+.toggle-label { font-size: .88rem; color: var(--text-muted, #888); font-weight: 600; }

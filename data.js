@@ -7,7 +7,7 @@
 
 const PORTFOLIO_KEY = 'am_portfolio_v1';
 const DATA_VERSION_KEY = 'am_portfolio_version';
-const DATA_VERSION = 7; // Bumped: clear old admin panel draft memory corruption
+const DATA_VERSION = 8; // Bumped: added whatsappApi config schema to contact data
 
 // Auto-clear stale data from old version (e.g., "Alex Morgan" defaults)
 (function migrateData() {
@@ -865,6 +865,12 @@ const DEFAULT_DATA = {
       twitter:   '#',
       dribbble:  '#',
       instagram: '#'
+    },
+    whatsappApi: {
+      enabled:      false,
+      apiKey:       '',
+      accountName:  '',
+      targetNumber: ''
     }
   },
   footer: {

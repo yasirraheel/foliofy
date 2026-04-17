@@ -357,7 +357,7 @@ function initSwiper() {
   const btn     = document.getElementById('submitBtn');
   if (!form) return;
 
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const fields = form.querySelectorAll('input[required], textarea[required]');
     let valid = true;
@@ -369,19 +369,59 @@ function initSwiper() {
 
     if (!valid) return;
 
-    // Simulate sending
+    // Collect form data
+    const name    = (form.querySelector('#contactName')    || form.querySelector('[name="name"]'))?.value.trim()    || '';
+    const email   = (form.querySelector('#contactEmail')   || form.querySelector('[name="email"]'))?.value.trim()   || '';
+    const subject = (form.querySelector('#contactSubject') || form.querySelector('[name="subject"]'))?.value.trim() || '';
+    const message = (form.querySelector('#contactMessage') || form.querySelector('[name="message"]'))?.value.trim() || '';
+
     btn.disabled = true;
-    btn.querySelector('.btn-text').textContent = 'Sending...';
+    btn.querySelector('.btn-text').textContent = 'Sending…';
     btn.style.opacity = '0.7';
 
-    setTimeout(() => {
-      btn.disabled = false;
-      btn.querySelector('.btn-text').textContent = 'Send Message';
-      btn.style.opacity = '1';
-      form.reset();
-      success.classList.add('show');
-      setTimeout(() => success.classList.remove('show'), 5000);
-    }, 1800);
+    // 1. Log message to server
+    try {
+      await fetch('api_messages.php?action=save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, subject, message })
+      });
+    } catch (_) { /* silent — don't block user experience */ }
+
+    // 2. Fire WhatsApp notification if configured
+    try {
+      const data = PortfolioData.get();
+      const wa   = data?.contact?.whatsappApi;
+      if (wa && wa.enabled && wa.apiKey && wa.accountName && wa.targetNumber) {
+        const waMsg =
+          `📬 *New Portfolio Contact!*\n\n` +
+          `*Name:* ${name}\n` +
+          `*Email:* ${email}\n` +
+          (subject ? `*Subject:* ${subject}\n` : '') +
+          `*Message:*\n${message}`;
+
+        await fetch('https://wa-server.shahabtech.com/api/v1/send-message', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Api-Key': wa.apiKey
+          },
+          body: JSON.stringify({
+            account_name: wa.accountName,
+            number:       wa.targetNumber,
+            message:      waMsg
+          })
+        });
+      }
+    } catch (_) { /* silent — WA failure should not affect UX */ }
+
+    // Reset UI
+    btn.disabled = false;
+    btn.querySelector('.btn-text').textContent = 'Send Message';
+    btn.style.opacity = '1';
+    form.reset();
+    success.classList.add('show');
+    setTimeout(() => success.classList.remove('show'), 5000);
   });
 
   // Real-time validation clearance

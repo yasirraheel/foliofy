@@ -89,10 +89,13 @@ function switchPanel(name) {
   const labels = {
     overview:'Overview', hero:'Hero', about:'About', skills:'Skills',
     projects:'Projects', experience:'Experience', testimonials:'Testimonials',
-    contact:'Contact', settings:'Settings'
+    contact:'Contact', inbox:'Inbox', settings:'Settings'
   };
   $('breadcrumbSection').textContent = labels[name] || name;
   currentPanel = name;
+
+  // Load inbox when navigating to it
+  if (name === 'inbox') loadInbox();
 
   // Mobile: close sidebar
   if (window.innerWidth < 900) $('sidebar').classList.remove('mobile-open');
@@ -168,6 +171,20 @@ function populateForms() {
   setValue('socialTwitter',   d.contact?.social?.twitter);
   setValue('socialDribbble',  d.contact?.social?.dribbble);
   setValue('socialInstagram', d.contact?.social?.instagram);
+
+  /* WHATSAPP API CONFIG */
+  const waEnabled = $('waEnabled');
+  const waLabel   = $('waEnabledLabel');
+  if (waEnabled) {
+    waEnabled.checked = !!(d.contact?.whatsappApi?.enabled);
+    if (waLabel) waLabel.textContent = waEnabled.checked ? 'Enabled' : 'Disabled';
+    waEnabled.addEventListener('change', () => {
+      if (waLabel) waLabel.textContent = waEnabled.checked ? 'Enabled' : 'Disabled';
+    });
+  }
+  setValue('waApiKey',       d.contact?.whatsappApi?.apiKey);
+  setValue('waAccountName',  d.contact?.whatsappApi?.accountName);
+  setValue('waTargetNumber', d.contact?.whatsappApi?.targetNumber);
 
   /* IMAGES — set preview thumbnails */
   const hi = $('heroImgPreviewEl');
@@ -613,6 +630,14 @@ function collectDraft() {
   draft.contact.social.twitter   = val('socialTwitter');
   draft.contact.social.dribbble  = val('socialDribbble');
   draft.contact.social.instagram = val('socialInstagram');
+
+  // WHATSAPP API CONFIG
+  if (!draft.contact.whatsappApi) draft.contact.whatsappApi = {};
+  const waEl = $('waEnabled');
+  draft.contact.whatsappApi.enabled      = waEl ? waEl.checked : false;
+  draft.contact.whatsappApi.apiKey       = val('waApiKey');
+  draft.contact.whatsappApi.accountName  = val('waAccountName');
+  draft.contact.whatsappApi.targetNumber = val('waTargetNumber');
   // images are live-synced via setupImageUpload, no need to read from DOM here
 }
 
@@ -629,6 +654,69 @@ function saveAll() {
   } else {
     toast('Failed to save. Storage may be full.', 'error');
   }
+}
+
+/* ══════════════════════════════════════
+   11b. INBOX — Load messages from server
+══════════════════════════════════════ */
+function loadInbox() {
+  const container = $('inboxContainer');
+  const badge     = $('inboxBadge');
+  if (!container) return;
+
+  container.innerHTML = '<p class="inbox-loading"><i class="fas fa-spinner fa-spin"></i> Loading messages…</p>';
+
+  fetch('api_messages.php?action=get')
+    .then(r => r.json())
+    .then(messages => {
+      if (!messages || !messages.length) {
+        container.innerHTML = '<p class="inbox-empty"><i class="fas fa-inbox"></i><br>No messages yet. When visitors submit the contact form, they appear here.</p>';
+        if (badge) badge.style.display = 'none';
+        return;
+      }
+
+      // Update badge
+      if (badge) { badge.textContent = messages.length; badge.style.display = 'inline-block'; }
+
+      container.innerHTML = '';
+      // newest first
+      [...messages].reverse().forEach((msg, idx) => {
+        const card = document.createElement('div');
+        card.className = 'inbox-card';
+        card.innerHTML = `
+          <div class="inbox-card-header">
+            <div class="inbox-meta">
+              <span class="inbox-name"><i class="fas fa-user"></i> ${escH(msg.name)}</span>
+              <span class="inbox-email"><i class="fas fa-envelope"></i> ${escH(msg.email)}</span>
+            </div>
+            <div class="inbox-time"><i class="fas fa-clock"></i> ${escH(msg.timestamp || '')}</div>
+          </div>
+          ${msg.subject ? `<div class="inbox-subject"><strong>Subject:</strong> ${escH(msg.subject)}</div>` : ''}
+          <div class="inbox-message">${escH(msg.message)}</div>
+          <div class="inbox-actions">
+            <a href="mailto:${escH(msg.email)}" class="btn-reply"><i class="fas fa-reply"></i> Reply via Email</a>
+            <button class="btn-delete-msg" data-idx="${messages.length - 1 - idx}"><i class="fas fa-trash"></i></button>
+          </div>`;
+        container.appendChild(card);
+      });
+
+      // Delete message
+      container.querySelectorAll('.btn-delete-msg').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const i = parseInt(btn.getAttribute('data-idx'));
+          fetch('api_messages.php?action=delete&index=' + i, { method: 'POST' })
+            .then(() => loadInbox());
+        });
+      });
+    })
+    .catch(() => {
+      container.innerHTML = '<p class="inbox-empty"><i class="fas fa-server"></i><br>Could not connect to the server. Make sure <code>api_messages.php</code> is deployed on your live hosting.</p>';
+    });
+}
+
+function escH(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 /* ══════════════════════════════════════
