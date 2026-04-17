@@ -350,45 +350,49 @@ function initSwiper() {
   });
 }
 
-/* ─── 12. CONTACT FORM ─── */
-  // ── Math Captcha ──
+/* ─── 12. CONTACT FORM + MATH CAPTCHA ─── */
+(function initContactForm() {
+
+  // ── Math Captcha helpers ──
   let _captchaAnswer = 0;
 
+  function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
   function generateCaptcha() {
-    const ops = ['+', '-', '×'];
+    const ops = ['+', '−', '×'];
     const op  = ops[Math.floor(Math.random() * ops.length)];
     let a, b, answer;
 
-    if (op === '+')      { a = rand(1,20); b = rand(1,20); answer = a + b; }
-    else if (op === '-') { a = rand(5,20); b = rand(1, a); answer = a - b; }
-    else                 { a = rand(2, 9); b = rand(2, 9); answer = a * b; }
+    if (op === '+')  { a = rand(1,20); b = rand(1,20); answer = a + b; }
+    else if (op === '−') { a = rand(5,20); b = rand(1, a); answer = a - b; }
+    else             { a = rand(2, 9);  b = rand(2, 9);  answer = a * b; }
 
     _captchaAnswer = answer;
 
-    const n1 = document.getElementById('captchaNum1');
-    const n2 = document.getElementById('captchaNum2');
+    const n1  = document.getElementById('captchaNum1');
+    const n2  = document.getElementById('captchaNum2');
     const op2 = document.getElementById('captchaOp');
     const ans = document.getElementById('captchaAnswer');
     const err = document.getElementById('captchaError');
 
-    if (n1) n1.textContent = a;
-    if (n2) n2.textContent = b;
+    if (n1)  n1.textContent  = a;
+    if (n2)  n2.textContent  = b;
     if (op2) op2.textContent = op;
-    if (ans) ans.value = '';
+    if (ans) ans.value       = '';
+    if (ans) ans.style.borderColor = '';
     if (err) err.style.display = 'none';
   }
 
-  function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-
   generateCaptcha();
+
   const refreshBtn = document.getElementById('captchaRefresh');
   if (refreshBtn) refreshBtn.addEventListener('click', () => {
     generateCaptcha();
     const ans = document.getElementById('captchaAnswer');
-    if (ans) { ans.style.borderColor = ''; ans.focus(); }
+    if (ans) ans.focus();
   });
 
-
+  // ── Form setup ──
   const form    = document.getElementById('contactForm');
   const success = document.getElementById('formSuccess');
   const btn     = document.getElementById('submitBtn');
@@ -396,43 +400,37 @@ function initSwiper() {
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-      const fields = form.querySelectorAll('input[required], textarea[required]');
-      let valid = true;
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-      fields.forEach(field => {
+    // Validate required fields + email format
+    const fields = form.querySelectorAll('input[required], textarea[required]');
+    let valid = true;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    fields.forEach(field => {
+      field.style.borderColor = '';
+      // Remove any previous error hint
+      const prev = field.closest('.form-group')?.querySelector('.field-error-hint');
+      if (prev) prev.remove();
+
+      if (!field.value.trim()) {
+        field.style.borderColor = '#f43f5e';
+        valid = false;
+      } else if (field.type === 'email' && !emailRegex.test(field.value.trim())) {
+        field.style.borderColor = '#f43f5e';
+        const hint = document.createElement('p');
+        hint.className = 'field-error-hint';
+        hint.style.cssText = 'color:#f43f5e;font-size:.78rem;margin:.3rem 0 0 .2rem;';
+        hint.textContent = '⚠️ Enter a valid email (e.g. name@domain.com)';
+        field.closest('.form-group').appendChild(hint);
+        valid = false;
+      }
+
+      field.addEventListener('input', () => {
         field.style.borderColor = '';
-        field.removeAttribute('data-err');
-
-        if (!field.value.trim()) {
-          field.style.borderColor = '#f43f5e';
-          valid = false;
-        } else if (field.type === 'email' && !emailRegex.test(field.value.trim())) {
-          field.style.borderColor = '#f43f5e';
-          // Show inline hint below the field
-          let hint = field.parentElement.querySelector('.field-error-hint');
-          if (!hint) {
-            hint = document.createElement('p');
-            hint.className = 'field-error-hint';
-            hint.style.cssText = 'color:#f43f5e;font-size:.78rem;margin:.3rem 0 0 .2rem;';
-            field.parentElement.insertAdjacentElement('afterend', hint);
-          }
-          hint.textContent = '⚠️ Enter a valid email (e.g. name@domain.com)';
-          field.setAttribute('data-err', '1');
-          valid = false;
-        }
-
-        // Clear hint on correct re-entry
-        field.addEventListener('input', () => {
-          field.style.borderColor = '';
-          const existingHint = field.parentElement.querySelector('.field-error-hint') ||
-                               field.parentElement.nextElementSibling?.classList?.contains('field-error-hint') &&
-                               field.parentElement.nextElementSibling;
-          if (existingHint && existingHint.classList?.contains('field-error-hint')) {
-            existingHint.remove();
-          }
-        }, { once: true });
-      });
+        const h = field.closest('.form-group')?.querySelector('.field-error-hint');
+        if (h) h.remove();
+      }, { once: true });
+    });
 
     if (!valid) return;
 
@@ -443,16 +441,16 @@ function initSwiper() {
     if (isNaN(userAnswer) || userAnswer !== _captchaAnswer) {
       if (captchaInput) captchaInput.style.borderColor = '#f43f5e';
       if (captchaErr)   captchaErr.style.display = 'block';
-      generateCaptcha(); // new question on failure
+      generateCaptcha();
       return;
     }
     if (captchaErr) captchaErr.style.display = 'none';
 
     // Collect form data
-    const name    = (form.querySelector('#contactName')    || form.querySelector('[name="name"]'))?.value.trim()    || '';
-    const email   = (form.querySelector('#contactEmail')   || form.querySelector('[name="email"]'))?.value.trim()   || '';
-    const subject = (form.querySelector('#contactSubject') || form.querySelector('[name="subject"]'))?.value.trim() || '';
-    const message = (form.querySelector('#contactMessage') || form.querySelector('[name="message"]'))?.value.trim() || '';
+    const name    = form.querySelector('[name="name"]')?.value.trim()    || form.querySelector('#contactName')?.value.trim()    || '';
+    const email   = form.querySelector('[name="email"]')?.value.trim()   || form.querySelector('#contactEmailInput')?.value.trim() || '';
+    const subject = form.querySelector('[name="subject"]')?.value.trim() || form.querySelector('#contactSubject')?.value.trim() || '';
+    const message = form.querySelector('[name="message"]')?.value.trim() || form.querySelector('#contactMessage')?.value.trim() || '';
 
     btn.disabled = true;
     btn.querySelector('.btn-text').textContent = 'Sending…';
@@ -465,7 +463,7 @@ function initSwiper() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, subject, message })
       });
-    } catch (_) { /* silent — don't block user experience */ }
+    } catch (_) { /* silent */ }
 
     // 2. Fire WhatsApp notification via server-side proxy (avoids CORS)
     try {
@@ -482,30 +480,26 @@ function initSwiper() {
         await fetch('wa_proxy.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            apiKey:      wa.apiKey,
-            accountName: wa.accountName,
-            number:      wa.targetNumber,
-            message:     waMsg
-          })
+          body: JSON.stringify({ apiKey: wa.apiKey, accountName: wa.accountName, number: wa.targetNumber, message: waMsg })
         });
       }
-    } catch (_) { /* silent — WA failure should not affect UX */ }
+    } catch (_) { /* silent */ }
 
     // Reset UI
     btn.disabled = false;
     btn.querySelector('.btn-text').textContent = 'Send Message';
     btn.style.opacity = '1';
     form.reset();
-    generateCaptcha(); // fresh question for next visitor
+    generateCaptcha();
     success.classList.add('show');
     setTimeout(() => success.classList.remove('show'), 5000);
   });
 
-  // Real-time validation clearance
+  // Real-time border clearance
   form.querySelectorAll('input, textarea').forEach(field => {
     field.addEventListener('input', () => { field.style.borderColor = ''; });
   });
+
 })();
 
 /* ─── 13. BACK TO TOP ─── */
