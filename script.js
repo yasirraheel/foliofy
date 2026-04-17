@@ -396,13 +396,43 @@ function initSwiper() {
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const fields = form.querySelectorAll('input[required], textarea[required]');
-    let valid = true;
+      const fields = form.querySelectorAll('input[required], textarea[required]');
+      let valid = true;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    fields.forEach(field => {
-      if (!field.value.trim()) { field.style.borderColor = '#f43f5e'; valid = false; }
-      else field.style.borderColor = '';
-    });
+      fields.forEach(field => {
+        field.style.borderColor = '';
+        field.removeAttribute('data-err');
+
+        if (!field.value.trim()) {
+          field.style.borderColor = '#f43f5e';
+          valid = false;
+        } else if (field.type === 'email' && !emailRegex.test(field.value.trim())) {
+          field.style.borderColor = '#f43f5e';
+          // Show inline hint below the field
+          let hint = field.parentElement.querySelector('.field-error-hint');
+          if (!hint) {
+            hint = document.createElement('p');
+            hint.className = 'field-error-hint';
+            hint.style.cssText = 'color:#f43f5e;font-size:.78rem;margin:.3rem 0 0 .2rem;';
+            field.parentElement.insertAdjacentElement('afterend', hint);
+          }
+          hint.textContent = '⚠️ Enter a valid email (e.g. name@domain.com)';
+          field.setAttribute('data-err', '1');
+          valid = false;
+        }
+
+        // Clear hint on correct re-entry
+        field.addEventListener('input', () => {
+          field.style.borderColor = '';
+          const existingHint = field.parentElement.querySelector('.field-error-hint') ||
+                               field.parentElement.nextElementSibling?.classList?.contains('field-error-hint') &&
+                               field.parentElement.nextElementSibling;
+          if (existingHint && existingHint.classList?.contains('field-error-hint')) {
+            existingHint.remove();
+          }
+        }, { once: true });
+      });
 
     if (!valid) return;
 
