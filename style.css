@@ -111,31 +111,62 @@ body.cursor-hover .cursor-inner { width: 4px; height: 4px; }
   background: var(--bg-base);
   z-index: 10000;
   display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 24px;
+  align-items: center; justify-content: center; gap: 28px;
   transition: opacity 0.6s ease, visibility 0.6s ease;
 }
 .page-loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-.loader-logo {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 2.5rem; font-weight: 700;
-  display: flex; align-items: center; gap: 4px;
+
+/* Loader ring (mini version of hero ring) */
+.loader-ring-outer {
+  position: relative;
+  width: 200px; height: 200px;
+  display: flex; align-items: center; justify-content: center;
 }
-.loader-bracket { color: var(--primary); }
-.loader-text {
-  background: var(--gradient-primary); -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent; background-clip: text;
+.loader-ring-outer::before, .loader-ring-outer::after {
+  content: ''; position: absolute; border-radius: 50%;
+  border: 1px solid hsla(250,84%,65%,0.25);
 }
-.loader-bar {
-  width: 200px; height: 3px;
-  background: var(--border); border-radius: 999px; overflow: hidden;
-}
-.loader-progress {
-  height: 100%; width: 0%;
+.loader-ring-outer::before { inset: -12px; animation: rotateRing 15s linear infinite; }
+.loader-ring-outer::after  { inset: -24px; animation: rotateRing 25s linear infinite reverse; border-color: hsla(195,95%,55%,0.15); }
+
+.loader-ring-inner {
+  width: 120px; height: 120px; border-radius: 50%;
   background: var(--gradient-primary);
-  border-radius: 999px;
-  animation: loadProgress 2s ease forwards;
+  padding: 3px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 50px hsla(250,84%,65%,0.45);
+  animation: float 3s ease-in-out infinite;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.1rem; font-weight: 700; color: #fff;
+  gap: 2px;
 }
+.loader-bracket { color: rgba(255,255,255,0.7); }
+
+/* Orbiting skill badges inside loader */
+.loader-orbit-badge {
+  position: absolute; width: 36px; height: 36px; border-radius: 50%;
+  background: var(--bg-card); border: 1px solid hsla(250,84%,65%,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.95rem; box-shadow: var(--shadow-md);
+  animation: loaderOrbit var(--orbit-duration, 12s) linear infinite;
+  transform-origin: calc(50% + 80px) 50%;
+}
+@keyframes loaderOrbit {
+  from { transform: rotate(0deg) translateX(88px) rotate(0deg); }
+  to   { transform: rotate(360deg) translateX(88px) rotate(-360deg); }
+}
+
+.loader-tagline {
+  font-size: 0.8rem; color: var(--text-muted);
+  letter-spacing: 0.08em; text-transform: uppercase;
+  animation: fadeInUp 0.8s ease 0.3s both;
+}
+@keyframes fadeInUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+/* OLD loader classes kept only so nothing breaks (unused now) */
+.loader-logo, .loader-bar, .loader-progress, .loader-text { display: none; }
 @keyframes loadProgress { to { width: 100%; } }
+
 
 /* ─── NAVBAR ─── */
 .navbar {
@@ -360,14 +391,40 @@ body.cursor-hover .cursor-inner { width: 4px; height: 4px; }
   background: var(--bg-card); border: 1px solid var(--border);
   display: flex; align-items: center; justify-content: center;
   font-size: 1.3rem; box-shadow: var(--shadow-md);
-  /* Each badge gets its own inline style for initial angle + animation-delay */
   animation: orbit var(--orbit-duration, 12s) linear infinite;
   transform-origin: calc(50% + 170px) 50%;
+  cursor: pointer;
 }
-.tech-badge:hover { border-color: var(--border-hover); transform-origin: calc(50% + 170px) 50%; z-index: 10; }
 @keyframes orbit {
   from { transform: rotate(0deg) translateX(190px) rotate(0deg); }
-  to { transform: rotate(360deg) translateX(190px) rotate(-360deg); }
+  to   { transform: rotate(360deg) translateX(190px) rotate(-360deg); }
+}
+
+/* Pause ALL badges when hovering anywhere on the profile ring */
+.profile-ring-outer:hover .tech-badge {
+  animation-play-state: paused;
+}
+
+/* Skill name tooltip (appears above on badge hover) */
+.tech-badge::after {
+  content: attr(data-name);
+  position: absolute; bottom: calc(100% + 8px); left: 50%;
+  transform: translateX(-50%) translateY(6px);
+  background: var(--bg-card); border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-family: 'Outfit', sans-serif; font-size: 0.68rem; font-weight: 700;
+  padding: 5px 10px; border-radius: 8px; white-space: nowrap;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.22s ease, transform 0.22s ease;
+  box-shadow: var(--shadow-md); z-index: 20;
+}
+.tech-badge:hover::after {
+  opacity: 1; transform: translateX(-50%) translateY(0);
+}
+.tech-badge:hover {
+  border-color: var(--primary);
+  box-shadow: 0 0 16px hsla(250,84%,65%,0.4);
+  z-index: 10;
 }
 
 /* Scroll indicator */
@@ -792,6 +849,17 @@ body.cursor-hover .cursor-inner { width: 4px; height: 4px; }
   .profile-ring-outer { width: 260px; height: 260px; }
   .profile-ring-inner { width: 220px; height: 220px; }
   .tech-badge { display: none; }
+
+  /* Scale loader ring on mobile */
+  .loader-ring-outer { width: 160px; height: 160px; }
+  .loader-ring-inner { width: 96px; height: 96px; font-size: 0.95rem; }
+  .loader-orbit-badge { width: 30px; height: 30px; font-size: 0.8rem;
+    transform-origin: calc(50% + 62px) 50%; }
+  .loader-orbit-badge { animation-name: loaderOrbitMobile; }
+    @keyframes loaderOrbitMobile {
+      from { transform: rotate(0deg) translateX(68px) rotate(0deg); }
+      to   { transform: rotate(360deg) translateX(68px) rotate(-360deg); }
+    }
 
   .form-row { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: 1fr; }

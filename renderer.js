@@ -124,10 +124,6 @@ const PortfolioRenderer = {
 
   /* ── ORBIT BADGES ── */
   renderOrbitBadges() {
-    const container = document.getElementById('orbitBadgesContainer');
-    if (!container) return;
-
-    // Gather all skill icons across all tabs
     const { skills, hero } = this.data;
     const allSkills = [
       ...(skills.frontend || []),
@@ -136,20 +132,44 @@ const PortfolioRenderer = {
     ];
     if (!allSkills.length) return;
 
-    const duration = hero.orbitSpeed || 12; // seconds per full revolution
+    const duration = hero.orbitSpeed || 12;
     const total    = allSkills.length;
 
-    // Set --orbit-duration on the ring so all badges share the same speed
-    const ring = container.closest('.profile-ring-outer');
-    if (ring) ring.style.setProperty('--orbit-duration', `${duration}s`);
+    /* ── HERO RING ── */
+    const heroContainer = document.getElementById('orbitBadgesContainer');
+    if (heroContainer) {
+      const ring = heroContainer.closest('.profile-ring-outer');
+      if (ring) ring.style.setProperty('--orbit-duration', `${duration}s`);
 
-    container.innerHTML = allSkills.map((skill, i) => {
-      // Evenly distribute using negative delay: badge i starts at (i/total * duration) seconds into the animation
-      const delay = -((i / total) * duration).toFixed(3);
-      return `<div class="tech-badge" style="color:${skill.iconColor || '#7c3aed'};animation-delay:${delay}s;" title="${skill.name}">
-        <i class="${skill.iconClass}"></i>
-      </div>`;
-    }).join('');
+      heroContainer.innerHTML = allSkills.map((skill, i) => {
+        const delay = -((i / total) * duration).toFixed(3);
+        return `<div class="tech-badge"
+          style="color:${skill.iconColor || '#7c3aed'};animation-delay:${delay}s;"
+          data-name="${skill.name}"
+          title="${skill.name}">
+          <i class="${skill.iconClass}"></i>
+        </div>`;
+      }).join('');
+    }
+
+    /* ── LOADER RING ── */
+    const loaderContainer = document.getElementById('loaderOrbitContainer');
+    if (loaderContainer) {
+      const loaderRing = loaderContainer.closest('.loader-ring-outer');
+      if (loaderRing) loaderRing.style.setProperty('--orbit-duration', `${duration}s`);
+
+      // Show a subset for the loader so it doesn't look crowded (max 12)
+      const loaderSkills = allSkills.slice(0, Math.min(allSkills.length, 12));
+      const lTotal = loaderSkills.length;
+      loaderContainer.innerHTML = loaderSkills.map((skill, i) => {
+        const delay = -((i / lTotal) * duration).toFixed(3);
+        return `<div class="loader-orbit-badge"
+          style="color:${skill.iconColor || '#7c3aed'};animation-delay:${delay}s;"
+          title="${skill.name}">
+          <i class="${skill.iconClass}"></i>
+        </div>`;
+      }).join('');
+    }
   },
 
   /* ── ABOUT ── */

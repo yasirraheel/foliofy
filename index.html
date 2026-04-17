@@ -31,12 +31,14 @@
 
   <!-- ═══════════════════════════════════════ LOADER ═══════════════════════════════════════ -->
   <div class="page-loader" id="pageLoader">
-    <div class="loader-logo">
-      <span class="loader-bracket">&lt;</span>
-      <span class="loader-text">AM</span>
-      <span class="loader-bracket">/&gt;</span>
+    <div class="loader-ring-outer">
+      <div class="loader-ring-inner">
+        <span class="loader-bracket">&lt;</span><span class="logo-name">AM</span><span class="loader-bracket">/&gt;</span>
+      </div>
+      <!-- Skill icon badges injected by renderer.js -->
+      <div id="loaderOrbitContainer"></div>
     </div>
-    <div class="loader-bar"><div class="loader-progress" id="loaderProgress"></div></div>
+    <p class="loader-tagline">Loading portfolio&hellip;</p>
   </div>
 
   <!-- ═══════════════════════════════════════ NAVBAR ═══════════════════════════════════════ -->
