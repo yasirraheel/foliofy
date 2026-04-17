@@ -38,6 +38,19 @@ const PortfolioRenderer = {
     const titleTags = document.querySelectorAll('meta[property="og:title"], meta[property="twitter:title"]');
     titleTags.forEach(tag => tag.setAttribute('content', meta.siteTitle));
 
+    // Dynamically set absolute URLs for origin, canonical, and social images
+    const currentUrl = window.location.href.split('?')[0];
+    const absoluteImageUrl = new URL('profile.png', window.location.origin + window.location.pathname).href;
+
+    const urlTags = document.querySelectorAll('link[rel="canonical"], meta[property="og:url"], meta[property="twitter:url"]');
+    urlTags.forEach(tag => {
+      const attr = tag.tagName === 'LINK' ? 'href' : 'content';
+      tag.setAttribute(attr, currentUrl);
+    });
+
+    const imgTags = document.querySelectorAll('meta[property="og:image"], meta[property="twitter:image"]');
+    imgTags.forEach(tag => tag.setAttribute('content', absoluteImageUrl));
+
     // Update brand initials in navbar logo and loader
     // Priority: explicit brandText > auto-initials from name > fallback
     const initials = meta.brandText
