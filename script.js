@@ -388,7 +388,7 @@ function initSwiper() {
       });
     } catch (_) { /* silent — don't block user experience */ }
 
-    // 2. Fire WhatsApp notification if configured
+    // 2. Fire WhatsApp notification via server-side proxy (avoids CORS)
     try {
       const data = PortfolioData.get();
       const wa   = data?.contact?.whatsappApi;
@@ -400,16 +400,14 @@ function initSwiper() {
           (subject ? `*Subject:* ${subject}\n` : '') +
           `*Message:*\n${message}`;
 
-        await fetch('https://wa-server.shahabtech.com/api/v1/send-message', {
+        await fetch('wa_proxy.php', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Api-Key': wa.apiKey
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            account_name: wa.accountName,
-            number:       wa.targetNumber,
-            message:      waMsg
+            apiKey:      wa.apiKey,
+            accountName: wa.accountName,
+            number:      wa.targetNumber,
+            message:     waMsg
           })
         });
       }
