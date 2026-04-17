@@ -427,6 +427,17 @@ body.cursor-hover .cursor-inner { width: 4px; height: 4px; }
   z-index: 10;
 }
 
+/* Mobile orbit — reduced radius to fit 260px ring within narrow viewports */
+@keyframes orbit-mobile {
+  from { transform: rotate(0deg)   translateX(105px) rotate(0deg); }
+  to   { transform: rotate(360deg) translateX(105px) rotate(-360deg); }
+}
+/* Extra-small phones (< 400px) — even tighter */
+@keyframes orbit-xs {
+  from { transform: rotate(0deg)   translateX(88px) rotate(0deg); }
+  to   { transform: rotate(360deg) translateX(88px) rotate(-360deg); }
+}
+
 /* Scroll indicator */
 .scroll-indicator {
   position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%);
@@ -845,10 +856,17 @@ body.cursor-hover .cursor-inner { width: 4px; height: 4px; }
   .hero-stats { flex-direction: column; align-items: center; gap: 20px; }
   .stat-divider { width: 60px; height: 1px; }
 
-  /* Scale down profile ring & hide orbit badges to prevent horizontal overflow */
-  .profile-ring-outer { width: 260px; height: 260px; }
-  .profile-ring-inner { width: 220px; height: 220px; }
-  .tech-badge { display: none; }
+  /* Scale down profile ring & keep orbit badges visible */
+  .profile-ring-outer { width: 260px; height: 260px; overflow: visible; }
+  .profile-ring-inner { width: 200px; height: 200px; }
+
+  /* Smaller badges + tighter orbit so they stay within the viewport */
+  .tech-badge {
+    display: flex;
+    width: 32px; height: 32px; font-size: 0.82rem;
+    animation-name: orbit-mobile;
+    transform-origin: calc(50% + 93px) 50%;
+  }
 
   /* Scale loader ring on mobile */
   .loader-ring-outer { width: 160px; height: 160px; }
@@ -884,6 +902,17 @@ body.cursor-hover .cursor-inner { width: 4px; height: 4px; }
   .contact-form-wrap { padding: 24px; }
   .timeline-meta { flex-direction: column; align-items: flex-start; }
   .timeline-header { flex-direction: column; }
+}
+
+/* Very small phones — ring and orbit shrink more */
+@media (max-width: 400px) {
+  .profile-ring-outer { width: 220px; height: 220px; }
+  .profile-ring-inner { width: 170px; height: 170px; }
+  .tech-badge {
+    width: 28px; height: 28px; font-size: 0.75rem;
+    animation-name: orbit-xs;
+    transform-origin: calc(50% + 74px) 50%;
+  }
 }
 
 /* ─── SMOOTH REVEAL ANIMATION ─── */
