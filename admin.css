@@ -718,3 +718,25 @@ input[type="file"]#aboutImageInput { display: none; }
 .img-upload-status {
   font-size: 0.82rem; min-height: 18px; font-weight: 500;
 }
+
+/* ─── ORBIT SPEED SLIDER ─── */
+.orbit-speed-row {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.orbit-speed-row input[type="range"] {
+  flex: 1; min-width: 120px; accent-color: var(--primary); cursor: pointer;
+  background: none; border: none; padding: 0;
+}
+.orbit-speed-label-text {
+  font-size: 0.78rem; color: var(--text-muted); white-space: nowrap;
+  display: flex; align-items: center; gap: 4px;
+}
+.orbit-speed-label-text i { font-size: 0.7rem; }
+.orbit-speed-value {
+  min-width: 36px; text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem; font-weight: 700;
+  color: var(--primary-light);
+  background: rgba(124,58,237,0.1); border: 1px solid rgba(124,58,237,0.2);
+  padding: 3px 8px; border-radius: 6px;
+}

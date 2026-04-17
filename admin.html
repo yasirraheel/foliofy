@@ -185,6 +185,19 @@
         <div class="section-divider"><span>Stats</span></div>
         <div id="heroStatsContainer" class="stats-edit-grid"></div>
 
+        <div class="section-divider"><span>Skill Icons Orbit</span></div>
+        <div class="form-grid">
+          <div class="form-group full-width orbit-speed-wrap">
+            <label>Orbit Circulation Speed <span class="hint">Lower = faster · Higher = slower</span></label>
+            <div class="orbit-speed-row">
+              <span class="orbit-speed-label-text"><i class="fas fa-bolt"></i> Fast</span>
+              <input type="range" id="heroOrbitSpeed" min="3" max="30" step="1" value="12" />
+              <span class="orbit-speed-label-text"><i class="fas fa-feather"></i> Slow</span>
+              <span class="orbit-speed-value" id="heroOrbitSpeedVal">12s</span>
+            </div>
+          </div>
+        </div>
+
         <div class="section-divider"><span>Profile Photo</span></div>
         <div class="image-upload-zone" id="heroUploadZone">
           <div class="img-upload-preview">

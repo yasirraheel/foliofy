@@ -122,6 +122,13 @@ function populateForms() {
   setValue('heroFirstName',     d.hero?.firstName);
   setValue('heroHighlightName', d.hero?.highlightName);
   setValue('heroDescription',   d.hero?.description);
+  // Orbit speed slider
+  const orbitSlider = $('heroOrbitSpeed');
+  const orbitVal    = $('heroOrbitSpeedVal');
+  if (orbitSlider && d.hero?.orbitSpeed) {
+    orbitSlider.value = d.hero.orbitSpeed;
+    if (orbitVal) orbitVal.textContent = d.hero.orbitSpeed + 's';
+  }
   buildTagChips('heroTypedTagList', 'heroTypedInput', 'heroTypedAddBtn', d.hero?.typedWords || [], (newList) => { draft.hero.typedWords = newList; });
   buildStatsEditor(d.hero?.stats || []);
 
@@ -572,6 +579,8 @@ function collectDraft() {
   draft.hero.firstName     = val('heroFirstName');
   draft.hero.highlightName = val('heroHighlightName');
   draft.hero.description   = val('heroDescription');
+  const orbitSpeedEl = $('heroOrbitSpeed');
+  if (orbitSpeedEl) draft.hero.orbitSpeed = parseInt(orbitSpeedEl.value) || 12;
   // typedWords already live-synced
   // stats
   const stats = draft.hero.stats || [];
@@ -626,6 +635,18 @@ function saveAll() {
    12. SETTINGS — CHANGE PASSWORD
 ══════════════════════════════════════ */
 function initSettings() {
+  // Live-sync orbit speed slider label
+  const orbitSlider = $('heroOrbitSpeed');
+  const orbitVal    = $('heroOrbitSpeedVal');
+  if (orbitSlider) {
+    orbitSlider.addEventListener('input', () => {
+      const v = parseInt(orbitSlider.value);
+      if (orbitVal) orbitVal.textContent = v + 's';
+      if (!draft.hero) draft.hero = {};
+      draft.hero.orbitSpeed = v;
+    });
+  }
+
   // Live-sync brand text directly into draft so it's always captured at save time
   const brandInput = $('metaBrandText');
   if (brandInput) {

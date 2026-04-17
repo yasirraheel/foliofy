@@ -33,6 +33,7 @@ const DEFAULT_DATA = {
     highlightName: 'Asif Shabbir',
     typedWords: ['Laravel Applications', 'React Frontends', 'Android Apps', 'REST APIs', 'Full-Stack Products', 'PHP Solutions'],
     description: 'A passionate <strong>Full-Stack Developer</strong> with expertise in Laravel, PHP, JavaScript, and Android — building scalable, real-world products that make an impact.',
+    orbitSpeed: 12,
     stats: [
       { number: 3,  label: 'Years Exp.' },
       { number: 51, label: 'GitHub Repos' },
