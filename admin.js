@@ -816,6 +816,9 @@ function initDashboard() {
   draft = PortfolioData.get();
   if (!draft.images) draft.images = { hero: 'profile.png', about: 'profile.png' };
 
+  // Set branded favicon for admin tab
+  setAdminFavicon(draft.meta);
+
   // Populate forms
   populateForms();
 
@@ -863,6 +866,51 @@ function escH(str) {
 }
 
 function capitalize(s) { return s ? s[0].toUpperCase() + s.slice(1) : s; }
+
+/** Generates a canvas-based favicon from brand text and sets it as the page icon */
+function setAdminFavicon(meta) {
+  try {
+    const brandText = meta?.brandText
+      ? meta.brandText.trim()
+      : (meta?.name
+          ? meta.name.trim().split(/\s+/).map(w => w[0]).slice(0, 3).join('').toUpperCase()
+          : 'AM');
+
+    const size = 64;
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = size;
+    const ctx = canvas.getContext('2d');
+
+    // Gradient background
+    const grad = ctx.createLinearGradient(0, 0, size, size);
+    grad.addColorStop(0, 'hsl(250,84%,65%)');
+    grad.addColorStop(1, 'hsl(195,95%,55%)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.roundRect(0, 0, size, size, 14);
+    ctx.fill();
+
+    // Brand text
+    const fontSize = brandText.length > 2 ? 20 : 26;
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `700 ${fontSize}px "Outfit", Arial, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(brandText, size / 2, size / 2);
+
+    // Apply to <link rel="icon">
+    let link = document.querySelector('link[rel~="icon"]');
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'icon';
+      document.head.appendChild(link);
+    }
+    link.type = 'image/png';
+    link.href = canvas.toDataURL('image/png');
+  } catch (e) {
+    // Non-critical — silently ignore
+  }
+}
 
 /* ── BOOT ── */
 document.addEventListener('DOMContentLoaded', initAuth);
