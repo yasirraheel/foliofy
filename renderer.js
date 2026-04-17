@@ -146,7 +146,7 @@ const PortfolioRenderer = {
         const delay = -((i / total) * duration).toFixed(3);
         const el = document.createElement('div');
         el.className = 'tech-badge';
-        el.style.cssText = `color:${skill.iconColor || '#7c3aed'};animation-delay:${delay}s;`;
+        el.style.cssText = `color:${skill.iconColor || '#7c3aed'}; animation-duration: ${duration}s; animation-delay: ${delay}s;`;
         el.setAttribute('data-name', skill.name);
         el.title = skill.name;
         el.innerHTML = `<i class="${skill.iconClass}"></i>`;
@@ -167,7 +167,7 @@ const PortfolioRenderer = {
         const delay = -((i / lTotal) * duration).toFixed(3);
         const el = document.createElement('div');
         el.className = 'loader-orbit-badge';
-        el.style.cssText = `color:${skill.iconColor || '#7c3aed'};animation-delay:${delay}s;`;
+        el.style.cssText = `color:${skill.iconColor || '#7c3aed'}; animation-duration: ${duration}s; animation-delay: ${delay}s;`;
         el.title = skill.name;
         el.innerHTML = `<i class="${skill.iconClass}"></i>`;
         loaderRing.appendChild(el);
