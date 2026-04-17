@@ -161,6 +161,12 @@ function populateForms() {
   setValue('socialTwitter',   d.contact?.social?.twitter);
   setValue('socialDribbble',  d.contact?.social?.dribbble);
   setValue('socialInstagram', d.contact?.social?.instagram);
+
+  /* IMAGES — set preview thumbnails */
+  const hi = $('heroImgPreviewEl');
+  if (hi && d.images?.hero)  hi.src = d.images.hero;
+  const ai = $('aboutImgPreviewEl');
+  if (ai && d.images?.about) ai.src = d.images.about;
 }
 
 function setValue(id, val) {
@@ -598,6 +604,7 @@ function collectDraft() {
   draft.contact.social.twitter   = val('socialTwitter');
   draft.contact.social.dribbble  = val('socialDribbble');
   draft.contact.social.instagram = val('socialInstagram');
+  // images are live-synced via setupImageUpload, no need to read from DOM here
 }
 
 function val(id) { const el = $(id); return el ? el.value : ''; }
@@ -657,6 +664,135 @@ function initSettings() {
 }
 
 /* ══════════════════════════════════════
+   IMAGE UPLOAD SYSTEM
+══════════════════════════════════════ */
+function initImageUploads() {
+  setupImageUpload('heroImageInput',  'heroImgPreviewEl',  'heroUploadStatus',  'hero');
+  setupImageUpload('aboutImageInput', 'aboutImgPreviewEl', 'aboutUploadStatus', 'about');
+
+  // "Use Hero Photo" button copies the hero image into the about slot
+  const syncBtn = $('aboutSyncBtn');
+  if (syncBtn) {
+    syncBtn.addEventListener('click', () => {
+      if (!draft.images) draft.images = {};
+      const heroSrc = draft.images.hero || 'profile.png';
+      draft.images.about = heroSrc;
+      const ai = $('aboutImgPreviewEl');
+      if (ai) ai.src = heroSrc;
+      setUploadStatus('aboutUploadStatus', 'Synced from Hero photo. Click Save Changes to persist.', 'ok');
+    });
+  }
+}
+
+function setupImageUpload(inputId, previewId, statusId, imageKey) {
+  const input   = $(inputId);
+  const preview = $(previewId);
+  if (!input || !preview) return;
+
+  if (!draft.images) draft.images = { hero: 'profile.png', about: 'profile.png' };
+  if (draft.images[imageKey]) preview.src = draft.images[imageKey];
+
+  // Drag-and-drop on the zone container
+  const zone = preview.closest?.('.image-upload-zone');
+  if (zone) {
+    zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', ()  => zone.classList.remove('drag-over'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault();
+      zone.classList.remove('drag-over');
+      const file = e.dataTransfer?.files[0];
+      if (file) processImageFile(file, preview, statusId, imageKey);
+    });
+  }
+
+  input.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (file) processImageFile(file, preview, statusId, imageKey);
+    input.value = '';
+  });
+}
+
+async function processImageFile(file, preview, statusId, imageKey) {
+  const validTypes = ['image/jpeg','image/png','image/webp','image/gif'];
+  if (!validTypes.includes(file.type)) {
+    setUploadStatus(statusId, '⚠️ Invalid type. Use JPG, PNG, WEBP or GIF.', 'err'); return;
+  }
+  if (file.size > 8 * 1024 * 1024) {
+    setUploadStatus(statusId, '⚠️ File too large. Max 8 MB.', 'err'); return;
+  }
+
+  setUploadStatus(statusId, 'Uploading…', 'info');
+  const dataUrl = await readFileAsDataURL(file);
+  preview.src = dataUrl; // immediate local preview
+
+  // Try PHP upload first
+  const phpOk = await tryPhpUpload(file, imageKey, statusId);
+  if (phpOk) return;
+
+  // Fallback: compress & store as base64 in localStorage
+  setUploadStatus(statusId, 'Compressing & saving locally…', 'info');
+  const compressed = await compressImageToDataUrl(dataUrl, 900, 0.82);
+  if (!draft.images) draft.images = {};
+  draft.images[imageKey] = compressed;
+  setUploadStatus(statusId, '✅ Saved (base64). Click Save Changes to persist.', 'ok');
+}
+
+async function tryPhpUpload(file, imageKey, statusId) {
+  try {
+    const fd = new FormData();
+    fd.append('image', file);
+    const old = draft.images?.[imageKey] || '';
+    if (old.startsWith('uploads/')) fd.append('replaces', old.replace('uploads/', ''));
+
+    const res = await fetch('upload.php', { method: 'POST', body: fd });
+    const ct  = res.headers.get('content-type') || '';
+    if (!res.ok || !ct.includes('json')) return false;
+
+    const json = await res.json();
+    if (json.success && json.url) {
+      if (!draft.images) draft.images = {};
+      draft.images[imageKey] = json.url;
+      setUploadStatus(statusId, '✅ Uploaded to server. Click Save Changes to persist.', 'ok');
+      return true;
+    }
+    setUploadStatus(statusId, '⚠️ Server: ' + (json.error || 'unknown error'), 'err');
+    return false;
+  } catch { return false; }
+}
+
+function readFileAsDataURL(file) {
+  return new Promise(resolve => {
+    const r = new FileReader();
+    r.onload = e => resolve(e.target.result);
+    r.readAsDataURL(file);
+  });
+}
+
+function compressImageToDataUrl(dataUrl, maxPx, quality) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const scale  = Math.min(1, maxPx / Math.max(img.width, img.height));
+      const canvas = document.createElement('canvas');
+      canvas.width  = Math.round(img.width  * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.src = dataUrl;
+  });
+}
+
+function setUploadStatus(statusId, msg, type) {
+  const el = $(statusId);
+  if (!el) return;
+  el.textContent = msg;
+  el.style.color = type === 'err'  ? 'var(--danger)'
+                 : type === 'ok'   ? 'var(--success)'
+                 : 'var(--text-muted)';
+}
+
+/* ══════════════════════════════════════
    13. SIDEBAR TOGGLE (mobile)
 ══════════════════════════════════════ */
 function initSidebarToggle() {
@@ -678,9 +814,13 @@ function initSidebarToggle() {
 function initDashboard() {
   // Load data into draft
   draft = PortfolioData.get();
+  if (!draft.images) draft.images = { hero: 'profile.png', about: 'profile.png' };
 
   // Populate forms
   populateForms();
+
+  // Image uploads
+  initImageUploads();
 
   // Skills tabs
   initSkillsTab();

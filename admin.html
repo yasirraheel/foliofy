@@ -184,6 +184,21 @@
 
         <div class="section-divider"><span>Stats</span></div>
         <div id="heroStatsContainer" class="stats-edit-grid"></div>
+
+        <div class="section-divider"><span>Profile Photo</span></div>
+        <div class="image-upload-zone" id="heroUploadZone">
+          <div class="img-upload-preview">
+            <img id="heroImgPreviewEl" src="profile.png" alt="Hero Profile" />
+          </div>
+          <div class="img-upload-controls">
+            <label class="btn-upload-img" for="heroImageInput">
+              <i class="fas fa-cloud-upload-alt"></i> Upload Profile Photo
+            </label>
+            <input type="file" id="heroImageInput" accept="image/jpeg,image/png,image/webp,image/gif" />
+            <p class="img-upload-hint"><i class="fas fa-info-circle"></i> JPG, PNG, WEBP · Max 8 MB · Used in Hero &amp; (optionally) About sections</p>
+            <p class="img-upload-status" id="heroUploadStatus"></p>
+          </div>
+        </div>
       </div>
 
       <!-- ── ABOUT PANEL ── -->
@@ -232,6 +247,24 @@
           <div class="form-group">
             <label>Experience Badge (e.g. 5+)</label>
             <input type="text" id="aboutExpYears" placeholder="5+" />
+          </div>
+        </div>
+
+        <div class="section-divider"><span>About Section Image</span></div>
+        <div class="image-upload-zone" id="aboutUploadZone">
+          <div class="img-upload-preview">
+            <img id="aboutImgPreviewEl" src="profile.png" alt="About" />
+          </div>
+          <div class="img-upload-controls">
+            <label class="btn-upload-img" for="aboutImageInput">
+              <i class="fas fa-cloud-upload-alt"></i> Upload About Image
+            </label>
+            <input type="file" id="aboutImageInput" accept="image/jpeg,image/png,image/webp,image/gif" />
+            <button class="btn-sync-img" id="aboutSyncBtn" title="Use same photo as Hero">
+              <i class="fas fa-sync-alt"></i> Use Hero Photo
+            </button>
+            <p class="img-upload-hint"><i class="fas fa-info-circle"></i> JPG, PNG, WEBP · Max 8 MB</p>
+            <p class="img-upload-status" id="aboutUploadStatus"></p>
           </div>
         </div>
       </div>

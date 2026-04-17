@@ -330,6 +330,10 @@ const DEFAULT_DATA = {
   },
   footer: {
     tagline: 'Building full-stack products — from Laravel to Android, one commit at a time.'
+  },
+  images: {
+    hero:  'profile.png',
+    about: 'profile.png'
   }
 };
 

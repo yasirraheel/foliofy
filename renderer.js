@@ -111,6 +111,10 @@ const PortfolioRenderer = {
       if (lbl) lbl.textContent = stat.label;
     });
 
+    // Profile image
+    const heroImg = document.querySelector('.profile-img');
+    if (heroImg && this.data.images?.hero) heroImg.src = this.data.images.hero;
+
     // Pass typed words to script.js via window
     window._portfolioTypedWords = hero.typedWords || [];
   },
@@ -133,6 +137,10 @@ const PortfolioRenderer = {
 
     const expNum = document.querySelector('.exp-number');
     if (expNum) expNum.textContent = about.expYears;
+
+    // About image
+    const aboutImg = document.querySelector('.about-img');
+    if (aboutImg && this.data.images?.about) aboutImg.src = this.data.images.about;
 
     // Code snippet
     const code = document.querySelector('.code-body code');
