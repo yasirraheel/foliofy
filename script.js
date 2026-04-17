@@ -385,11 +385,34 @@ function initSwiper() {
 
   generateCaptcha();
 
+  // Disable submit until captcha is correct
+  const submitBtn = document.getElementById('submitBtn');
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.style.opacity = '0.5'; submitBtn.style.cursor = 'not-allowed'; }
+
+  // Live captcha checking
+  const captchaInput = document.getElementById('captchaAnswer');
+  if (captchaInput) {
+    captchaInput.addEventListener('input', () => {
+      const entered = parseInt(captchaInput.value, 10);
+      const correct = !isNaN(entered) && entered === _captchaAnswer;
+      captchaInput.style.borderColor = captchaInput.value === '' ? '' : (correct ? '#22c55e' : '#f43f5e');
+      const captchaErr = document.getElementById('captchaError');
+      if (captchaErr) captchaErr.style.display = 'none';
+      if (submitBtn) {
+        submitBtn.disabled   = !correct;
+        submitBtn.style.opacity = correct ? '1' : '0.5';
+        submitBtn.style.cursor  = correct ? 'pointer' : 'not-allowed';
+      }
+    });
+  }
+
   const refreshBtn = document.getElementById('captchaRefresh');
   if (refreshBtn) refreshBtn.addEventListener('click', () => {
     generateCaptcha();
     const ans = document.getElementById('captchaAnswer');
     if (ans) ans.focus();
+    // Lock submit again on new question
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.style.opacity = '0.5'; submitBtn.style.cursor = 'not-allowed'; }
   });
 
   // ── Form setup ──
@@ -491,6 +514,7 @@ function initSwiper() {
     btn.style.opacity = '1';
     form.reset();
     generateCaptcha();
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.style.opacity = '0.5'; submitBtn.style.cursor = 'not-allowed'; }
     success.classList.add('show');
     setTimeout(() => success.classList.remove('show'), 5000);
   });

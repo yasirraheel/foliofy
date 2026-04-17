@@ -963,8 +963,12 @@ body.cursor-hover .cursor-inner { width: 4px; height: 4px; }
 }
 .captcha-op  { color: #7c3aed; font-size: 1.3rem; }
 .captcha-eq  { color: var(--text-muted); font-size: 1.2rem; }
-.captcha-input-wrap { flex: 1; min-width: 100px; max-width: 140px; }
+.captcha-input-wrap { flex: 1; min-width: 130px; max-width: 180px; }
 .captcha-input-wrap input { width: 100%; }
+/* Remove number input spinner arrows */
+.captcha-input-wrap input::-webkit-outer-spin-button,
+.captcha-input-wrap input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.captcha-input-wrap input[type=number] { -moz-appearance: textfield; }
 .captcha-refresh {
   display: inline-flex; align-items: center; justify-content: center;
   width: 40px; height: 40px; border-radius: 10px;
