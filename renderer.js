@@ -40,7 +40,7 @@ const PortfolioRenderer = {
 
     // Dynamically set absolute URLs for origin, canonical, and social images
     const currentUrl = window.location.href.split('?')[0];
-    const absoluteImageUrl = new URL('profile.png?v=3', window.location.origin + window.location.pathname).href;
+    const absoluteImageUrl = new URL('og-image.png', window.location.origin + window.location.pathname).href;
 
     const urlTags = document.querySelectorAll('link[rel="canonical"], meta[property="og:url"], meta[property="twitter:url"]');
     urlTags.forEach(tag => {
