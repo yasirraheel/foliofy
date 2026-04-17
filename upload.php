@@ -60,6 +60,15 @@ if (!move_uploaded_file($file['tmp_name'], $destPath)) {
     exit;
 }
 
+// Overwrite the canonical static file so it's always accessible without localStorage
+$imageKey = $_POST['imageKey'] ?? '';
+if ($imageKey === 'hero' || $imageKey === '') {
+    @copy($destPath, __DIR__ . '/profile.png');
+}
+if ($imageKey === 'about') {
+    @copy($destPath, __DIR__ . '/profile.png'); // same photo used for about too
+}
+
 // Optionally delete old uploaded image for the same slot (key passed in POST)
 if (!empty($_POST['replaces'])) {
     $old = basename($_POST['replaces']);

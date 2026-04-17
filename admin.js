@@ -850,6 +850,7 @@ async function tryPhpUpload(file, imageKey, statusId) {
   try {
     const fd = new FormData();
     fd.append('image', file);
+    fd.append('imageKey', imageKey);
     const old = draft.images?.[imageKey] || '';
     if (old.startsWith('uploads/')) fd.append('replaces', old.replace('uploads/', ''));
 

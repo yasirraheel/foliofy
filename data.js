@@ -9,12 +9,30 @@ const PORTFOLIO_KEY = 'am_portfolio_v1';
 const DATA_VERSION_KEY = 'am_portfolio_version';
 const DATA_VERSION = 8; // Bumped: added whatsappApi config schema to contact data
 
-// Auto-clear stale data from old version (e.g., "Alex Morgan" defaults)
+// Migrate stale data — preserves uploaded images across version bumps
 (function migrateData() {
   const storedVersion = parseInt(localStorage.getItem(DATA_VERSION_KEY) || '0', 10);
   if (storedVersion < DATA_VERSION) {
+    // Rescue any custom-uploaded images before wiping
+    let savedImages = null;
+    try {
+      const old = localStorage.getItem(PORTFOLIO_KEY);
+      if (old) {
+        const parsed = JSON.parse(old);
+        if (parsed?.images) savedImages = parsed.images;
+      }
+    } catch (_) {}
+
     localStorage.removeItem(PORTFOLIO_KEY);
     localStorage.setItem(DATA_VERSION_KEY, String(DATA_VERSION));
+
+    // Re-inject the rescued images immediately so they survive
+    if (savedImages) {
+      try {
+        const fresh = JSON.parse(JSON.stringify({ images: savedImages }));
+        localStorage.setItem(PORTFOLIO_KEY, JSON.stringify(fresh));
+      } catch (_) {}
+    }
   }
 })();
 
