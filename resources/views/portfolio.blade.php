@@ -932,8 +932,8 @@
   <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
   <!-- Core Data & Renderer -->
-  <script src="data.js?v=5"></script>
-  <script src="renderer.js?v=5"></script>
-  <script src="script.js"></script>
+  <script src="data.js?v=10"></script>
+  <script src="renderer.js?v=10"></script>
+  <script src="script.js?v=10"></script>
 </body>
 </html>

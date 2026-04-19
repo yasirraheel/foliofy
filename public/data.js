@@ -1,41 +1,9 @@
 /* ══════════════════════════════════════════════════════
-   DATA.JS — Portfolio Data Layer (localStorage CMS)
+   DATA.JS - Portfolio Data Layer (Laravel + MySQL)
    GitHub: yasirraheel | Muhammad Asif Shabbir
    ══════════════════════════════════════════════════════ */
 
 'use strict';
-
-const PORTFOLIO_KEY = 'am_portfolio_v1';
-const DATA_VERSION_KEY = 'am_portfolio_version';
-const DATA_VERSION = 8; // Bumped: added whatsappApi config schema to contact data
-
-// Migrate stale data — preserves uploaded images across version bumps
-(function migrateData() {
-  const storedVersion = parseInt(localStorage.getItem(DATA_VERSION_KEY) || '0', 10);
-  if (storedVersion < DATA_VERSION) {
-    // Rescue any custom-uploaded images before wiping
-    let savedImages = null;
-    try {
-      const old = localStorage.getItem(PORTFOLIO_KEY);
-      if (old) {
-        const parsed = JSON.parse(old);
-        if (parsed?.images) savedImages = parsed.images;
-      }
-    } catch (_) {}
-
-    localStorage.removeItem(PORTFOLIO_KEY);
-    localStorage.setItem(DATA_VERSION_KEY, String(DATA_VERSION));
-
-    // Re-inject the rescued images immediately so they survive
-    if (savedImages) {
-      try {
-        const fresh = JSON.parse(JSON.stringify({ images: savedImages }));
-        localStorage.setItem(PORTFOLIO_KEY, JSON.stringify(fresh));
-      } catch (_) {}
-    }
-  }
-})();
-
 
 const DEFAULT_DATA = {
   meta: {
@@ -900,46 +868,44 @@ const DEFAULT_DATA = {
   }
 };
 
-/* ── Public API ── */
-const PortfolioData = {
-  /** Get current data (localStorage → defaults) */
-  get() {
-    try {
-      const raw = localStorage.getItem(PORTFOLIO_KEY);
-      if (!raw) return this._clone(DEFAULT_DATA);
-      return this._merge(this._clone(DEFAULT_DATA), JSON.parse(raw));
-    } catch { return this._clone(DEFAULT_DATA); }
-  },
+/* Public API */
+const clonePortfolioData = (obj) => JSON.parse(JSON.stringify(obj));
 
-  /** Save full data object */
-  save(data) {
-    try { localStorage.setItem(PORTFOLIO_KEY, JSON.stringify(data)); return true; }
-    catch { return false; }
-  },
+const mergePortfolioData = (base, overrides) => {
+  const out = Object.assign({}, base);
 
-  /** Reset to factory defaults */
-  reset() {
-    localStorage.removeItem(PORTFOLIO_KEY);
-    return this._clone(DEFAULT_DATA);
-  },
+  for (const key of Object.keys(overrides || {})) {
+    const nextValue = overrides[key];
+    const baseValue = base[key];
 
-  /** Return a fresh copy of defaults */
-  defaults() { return this._clone(DEFAULT_DATA); },
-
-  _clone(obj) { return JSON.parse(JSON.stringify(obj)); },
-
-  /** Deep-merge stored data onto defaults so new default keys propagate */
-  _merge(base, stored) {
-    const out = Object.assign({}, base);
-    for (const k of Object.keys(stored)) {
-      if (stored[k] !== null && typeof stored[k] === 'object' && !Array.isArray(stored[k]) && typeof base[k] === 'object' && !Array.isArray(base[k])) {
-        out[k] = this._merge(base[k], stored[k]);
-      } else {
-        out[k] = stored[k];
-      }
+    if (
+      nextValue !== null &&
+      typeof nextValue === 'object' &&
+      !Array.isArray(nextValue) &&
+      baseValue !== null &&
+      typeof baseValue === 'object' &&
+      !Array.isArray(baseValue)
+    ) {
+      out[key] = mergePortfolioData(baseValue, nextValue);
+      continue;
     }
-    return out;
+
+    out[key] = nextValue;
   }
+
+  return out;
+};
+
+const hasPortfolioContent = (value) => {
+  if (Array.isArray(value)) {
+    return value.length > 0;
+  }
+
+  if (value && typeof value === 'object') {
+    return Object.values(value).some(hasPortfolioContent);
+  }
+
+  return value !== null && value !== undefined && value !== '';
 };
 
 const SERVER_DATA_STATE = (() => {
@@ -947,32 +913,52 @@ const SERVER_DATA_STATE = (() => {
     return {};
   }
 
-  return JSON.parse(JSON.stringify(window.__PORTFOLIO_DATA__));
+  return clonePortfolioData(window.__PORTFOLIO_DATA__);
 })();
 
-PortfolioData.get = function () {
-  return this._merge(this._clone(DEFAULT_DATA), this._clone(SERVER_DATA_STATE));
+const syncWindowPortfolioData = () => {
+  if (typeof window !== 'undefined') {
+    window.__PORTFOLIO_DATA__ = clonePortfolioData(SERVER_DATA_STATE);
+  }
 };
 
-PortfolioData.save = function (data) {
-  if (!data || typeof data !== 'object') return false;
-
-  Object.keys(SERVER_DATA_STATE).forEach(key => delete SERVER_DATA_STATE[key]);
-  Object.assign(SERVER_DATA_STATE, this._clone(data));
-
-  if (typeof window !== 'undefined') {
-    window.__PORTFOLIO_DATA__ = this._clone(SERVER_DATA_STATE);
-  }
-
-  return true;
+const replaceServerPortfolioData = (data) => {
+  Object.keys(SERVER_DATA_STATE).forEach((key) => delete SERVER_DATA_STATE[key]);
+  Object.assign(SERVER_DATA_STATE, clonePortfolioData(data || {}));
+  syncWindowPortfolioData();
 };
 
-PortfolioData.reset = function () {
-  Object.keys(SERVER_DATA_STATE).forEach(key => delete SERVER_DATA_STATE[key]);
+const PortfolioData = {
+  get() {
+    if (!hasPortfolioContent(SERVER_DATA_STATE)) {
+      return this.defaults();
+    }
 
-  if (typeof window !== 'undefined') {
-    window.__PORTFOLIO_DATA__ = {};
+    return mergePortfolioData(this.defaults(), clonePortfolioData(SERVER_DATA_STATE));
+  },
+
+  save(data) {
+    if (!data || typeof data !== 'object') return false;
+
+    replaceServerPortfolioData(data);
+    return true;
+  },
+
+  reset() {
+    const defaults = this.defaults();
+    replaceServerPortfolioData(defaults);
+    return defaults;
+  },
+
+  defaults() {
+    return clonePortfolioData(DEFAULT_DATA);
+  },
+
+  _clone(obj) {
+    return clonePortfolioData(obj);
+  },
+
+  _merge(base, overrides) {
+    return mergePortfolioData(base, overrides);
   }
-
-  return this._clone(DEFAULT_DATA);
 };

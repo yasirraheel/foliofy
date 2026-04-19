@@ -64,6 +64,25 @@ class PortfolioApplicationTest extends TestCase
             ->assertSee('Portfolio Admin Dashboard');
     }
 
+    public function test_public_page_injects_database_portfolio_data_into_the_frontend_boot_payload(): void
+    {
+        $this->seed(PortfolioDataSeeder::class);
+
+        $response = $this->get('/');
+
+        $response
+            ->assertOk()
+            ->assertSee('window.__PORTFOLIO_DATA__=', false)
+            ->assertSee('"name":"Muhammad Asif Shabbir"', false)
+            ->assertSee('"email":"yasirraheel@github.com"', false)
+            ->assertSee('data.js?v=10', false)
+            ->assertSee('renderer.js?v=10', false)
+            ->assertSee('script.js?v=10', false);
+
+        $this->assertStringContainsString('no-store', (string) $response->headers->get('Cache-Control'));
+        $this->assertStringContainsString('no-cache', (string) $response->headers->get('Cache-Control'));
+    }
+
     public function test_admin_login_bootstrap_and_password_update_use_session_auth(): void
     {
         $admin = User::factory()->create([
