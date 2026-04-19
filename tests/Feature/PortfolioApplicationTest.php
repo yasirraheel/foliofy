@@ -3,11 +3,13 @@
 namespace Tests\Feature;
 
 use App\Models\ContactMessage;
-use App\Models\PortfolioContent;
 use App\Models\User;
+use Database\Seeders\PortfolioDataSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class PortfolioApplicationTest extends TestCase
@@ -47,6 +49,8 @@ class PortfolioApplicationTest extends TestCase
 
     public function test_portfolio_and_admin_pages_are_served_from_laravel(): void
     {
+        $this->assertFalse(Schema::hasTable('portfolio_contents'));
+
         $this->get('/')
             ->assertOk()
             ->assertSee('Muhammad Asif');
@@ -137,8 +141,45 @@ class PortfolioApplicationTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.meta.name', 'Updated Name');
 
-        $this->assertDatabaseHas('portfolio_contents', ['id' => 1]);
-        $this->assertSame('Updated Name', PortfolioContent::query()->findOrFail(1)->data['meta']['name']);
+        $this->assertDatabaseHas('portfolio_meta', [
+            'id' => 1,
+            'name' => 'Updated Name',
+            'site_title' => 'Updated Portfolio',
+        ]);
+        $this->assertDatabaseHas('portfolio_contact', [
+            'id' => 1,
+            'email' => 'hello@example.com',
+            'whatsapp_enabled' => 1,
+            'whatsapp_account_name' => 'portfolio',
+            'whatsapp_target_number' => '923001234567',
+        ]);
+    }
+
+    public function test_portfolio_data_seeder_populates_normalized_tables_with_existing_content(): void
+    {
+        $this->seed(PortfolioDataSeeder::class);
+
+        $this->assertDatabaseHas('portfolio_meta', [
+            'id' => 1,
+            'name' => 'Muhammad Asif Shabbir',
+            'brand_text' => 'MAS',
+        ]);
+        $this->assertDatabaseHas('portfolio_hero', [
+            'id' => 1,
+            'highlight_name' => 'Asif Shabbir',
+        ]);
+        $this->assertDatabaseHas('portfolio_about', [
+            'id' => 1,
+            'degree' => 'Computer Science',
+        ]);
+        $this->assertDatabaseHas('portfolio_contact', [
+            'id' => 1,
+            'email' => 'yasirraheel@github.com',
+        ]);
+        $this->assertGreaterThan(0, DB::table('portfolio_skills')->count());
+        $this->assertGreaterThan(0, DB::table('portfolio_projects')->count());
+        $this->assertGreaterThan(0, DB::table('portfolio_experiences')->count());
+        $this->assertGreaterThan(0, DB::table('portfolio_testimonials')->count());
     }
 
     public function test_contact_messages_are_saved_in_mysql_and_manageable_from_admin(): void
