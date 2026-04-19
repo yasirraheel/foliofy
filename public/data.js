@@ -941,3 +941,38 @@ const PortfolioData = {
     return out;
   }
 };
+
+const SERVER_DATA_STATE = (() => {
+  if (typeof window === 'undefined' || typeof window.__PORTFOLIO_DATA__ !== 'object' || window.__PORTFOLIO_DATA__ === null) {
+    return {};
+  }
+
+  return JSON.parse(JSON.stringify(window.__PORTFOLIO_DATA__));
+})();
+
+PortfolioData.get = function () {
+  return this._merge(this._clone(DEFAULT_DATA), this._clone(SERVER_DATA_STATE));
+};
+
+PortfolioData.save = function (data) {
+  if (!data || typeof data !== 'object') return false;
+
+  Object.keys(SERVER_DATA_STATE).forEach(key => delete SERVER_DATA_STATE[key]);
+  Object.assign(SERVER_DATA_STATE, this._clone(data));
+
+  if (typeof window !== 'undefined') {
+    window.__PORTFOLIO_DATA__ = this._clone(SERVER_DATA_STATE);
+  }
+
+  return true;
+};
+
+PortfolioData.reset = function () {
+  Object.keys(SERVER_DATA_STATE).forEach(key => delete SERVER_DATA_STATE[key]);
+
+  if (typeof window !== 'undefined') {
+    window.__PORTFOLIO_DATA__ = {};
+  }
+
+  return this._clone(DEFAULT_DATA);
+};

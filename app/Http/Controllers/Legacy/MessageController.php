@@ -3,9 +3,13 @@
 namespace App\Http\Controllers\Legacy;
 
 use App\Http\Controllers\Controller;
+use App\Models\ContactMessage;
+use App\Models\User;
+use App\Support\PortfolioDataStore;
+use App\Support\WhatsAppNotifier;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Auth;
 
 class MessageController extends Controller
 {
@@ -14,6 +18,12 @@ class MessageController extends Controller
         'Access-Control-Allow-Methods' => 'GET, POST, OPTIONS',
         'Access-Control-Allow-Headers' => 'Content-Type',
     ];
+
+    public function __construct(
+        private readonly PortfolioDataStore $portfolioDataStore,
+        private readonly WhatsAppNotifier $whatsAppNotifier,
+    ) {
+    }
 
     public function __invoke(Request $request): JsonResponse
     {
@@ -24,6 +34,10 @@ class MessageController extends Controller
         $action = (string) $request->query('action', 'save');
 
         if ($request->isMethod('get') && $action === 'get') {
+            if (! $this->adminUser()) {
+                return response()->json(['error' => 'Unauthenticated.'], 401, self::CORS_HEADERS);
+            }
+
             return response()->json($this->readMessages(), 200, self::CORS_HEADERS);
         }
 
@@ -38,17 +52,24 @@ class MessageController extends Controller
                 return response()->json(['error' => 'Missing required fields'], 400, self::CORS_HEADERS);
             }
 
-            $messages = $this->readMessages();
-            $messages[] = [
+            $message = ContactMessage::query()->create([
                 'name' => $this->sanitize((string) $payload['name']),
                 'email' => $this->sanitize((string) $payload['email']),
                 'subject' => $this->sanitize((string) ($payload['subject'] ?? '')),
                 'message' => $this->sanitize((string) $payload['message']),
-                'timestamp' => now()->format('Y-m-d H:i:s'),
                 'ip' => $request->ip() ?? '',
-            ];
+            ]);
 
-            $this->writeMessages($messages);
+            $messages = $this->readMessages();
+            $this->whatsAppNotifier->sendContactMessage(
+                $this->portfolioDataStore->full(),
+                [
+                    'name' => $message->name,
+                    'email' => $message->email,
+                    'subject' => $message->subject,
+                    'message' => $message->message,
+                ]
+            );
 
             return response()->json([
                 'success' => true,
@@ -57,19 +78,24 @@ class MessageController extends Controller
         }
 
         if ($request->isMethod('post') && $action === 'delete') {
-            $index = (int) $request->query('index', -1);
-            $messages = $this->readMessages();
-
-            if ($index < 0 || $index >= count($messages)) {
-                return response()->json(['error' => 'Invalid index'], 400, self::CORS_HEADERS);
+            if (! $this->adminUser()) {
+                return response()->json(['error' => 'Unauthenticated.'], 401, self::CORS_HEADERS);
             }
 
-            array_splice($messages, $index, 1);
-            $this->writeMessages($messages);
+            $id = (int) $request->query('id', 0);
+            $message = $id > 0
+                ? ContactMessage::query()->find($id)
+                : $this->messageByIndex((int) $request->query('index', -1));
+
+            if (! $message) {
+                return response()->json(['error' => 'Invalid message'], 400, self::CORS_HEADERS);
+            }
+
+            $message->delete();
 
             return response()->json([
                 'success' => true,
-                'total' => count($messages),
+                'total' => ContactMessage::query()->count(),
             ], 200, self::CORS_HEADERS);
         }
 
@@ -78,30 +104,46 @@ class MessageController extends Controller
 
     private function readMessages(): array
     {
-        $path = (string) config('portfolio.messages_path');
-
-        if (! File::exists($path)) {
-            return [];
-        }
-
-        $decoded = json_decode((string) File::get($path), true);
-
-        return is_array($decoded) ? $decoded : [];
-    }
-
-    private function writeMessages(array $messages): void
-    {
-        $path = (string) config('portfolio.messages_path');
-
-        File::ensureDirectoryExists(dirname($path));
-        File::put(
-            $path,
-            json_encode(array_values($messages), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
-        );
+        return ContactMessage::query()
+            ->orderBy('id')
+            ->get()
+            ->map(fn (ContactMessage $message): array => [
+                'id' => $message->id,
+                'name' => $message->name,
+                'email' => $message->email,
+                'subject' => $message->subject ?? '',
+                'message' => $message->message,
+                'timestamp' => $message->created_at?->format('Y-m-d H:i:s') ?? '',
+                'ip' => $message->ip ?? '',
+            ])
+            ->all();
     }
 
     private function sanitize(string $value): string
     {
         return htmlspecialchars(strip_tags($value), ENT_QUOTES, 'UTF-8');
+    }
+
+    private function messageByIndex(int $index): ?ContactMessage
+    {
+        if ($index < 0) {
+            return null;
+        }
+
+        return ContactMessage::query()
+            ->orderBy('id')
+            ->skip($index)
+            ->first();
+    }
+
+    private function adminUser(): ?User
+    {
+        $user = Auth::user();
+
+        if (! $user instanceof User || ! $user->is_admin) {
+            return null;
+        }
+
+        return $user;
     }
 }

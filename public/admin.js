@@ -7,11 +7,10 @@
 /* ══════════════════════════════════════
    0. HELPERS
 ══════════════════════════════════════ */
-const ADMIN_PWD_KEY  = 'am_admin_pwd';
-const ADMIN_AUTH_KEY = 'am_admin_auth';
-const DEFAULT_PWD    = 'admin@2024';
-
 const $ = id => document.getElementById(id);
+const csrfToken = window.__CSRF_TOKEN__ || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+let dashboardInitialized = false;
+
 const toast = (msg, type = 'success') => {
   const c = $('toastContainer');
   const t = document.createElement('div');
@@ -27,12 +26,67 @@ const removeToast = el => {
   setTimeout(() => el.remove(), 350);
 };
 
-const getAdminPwd = () => localStorage.getItem(ADMIN_PWD_KEY) || DEFAULT_PWD;
+async function requestJson(url, options = {}) {
+  const { method = 'GET', data, headers = {} } = options;
+  const requestHeaders = { Accept: 'application/json', ...headers };
+
+  if (method !== 'GET' && method !== 'HEAD' && csrfToken) {
+    requestHeaders['X-CSRF-TOKEN'] = csrfToken;
+  }
+
+  if (data !== undefined && !requestHeaders['Content-Type']) {
+    requestHeaders['Content-Type'] = 'application/json';
+  }
+
+  const response = await fetch(url, {
+    method,
+    headers: requestHeaders,
+    body: data === undefined ? undefined : JSON.stringify(data)
+  });
+
+  const contentType = response.headers.get('content-type') || '';
+  const payload = contentType.includes('application/json') ? await response.json() : {};
+
+  if (!response.ok) {
+    const error = new Error(payload.error || payload.message || 'Request failed.');
+    error.status = response.status;
+    error.payload = payload;
+    throw error;
+  }
+
+  return payload;
+}
+
+function replaceServerState(data) {
+  PortfolioData.save(data || {});
+}
+
+function showDashboard(data) {
+  if (data) replaceServerState(data);
+
+  $('loginScreen').style.display = 'none';
+  $('dashboard').style.display = 'flex';
+
+  if (!dashboardInitialized) {
+    dashboardInitialized = true;
+    initDashboard();
+    return;
+  }
+
+  draft = PortfolioData.get();
+  populateForms();
+}
+
+function showLogin(error = '') {
+  $('dashboard').style.display = 'none';
+  $('loginScreen').style.display = 'flex';
+  $('loginError').textContent = error;
+}
 
 /* ══════════════════════════════════════
    1. AUTH
 ══════════════════════════════════════ */
-function initAuth() {
+async function initAuth() {
   // Toggle password visibility
   $('toggleLoginPwd').addEventListener('click', () => {
     const inp  = $('loginPasswordInput');
@@ -42,31 +96,56 @@ function initAuth() {
   });
 
   // Login
-  const doLogin = () => {
+  const doLogin = async () => {
     const val = $('loginPasswordInput').value;
-    if (!val)          { $('loginError').textContent = 'Please enter a password.'; return; }
-    if (val !== getAdminPwd()) { $('loginError').textContent = 'Incorrect password. Try again.'; return; }
-    sessionStorage.setItem(ADMIN_AUTH_KEY, '1');
-    $('loginScreen').style.display = 'none';
-    $('dashboard').style.display = 'flex';
-    initDashboard();
+    const btn = $('loginBtn');
+    if (!val) { $('loginError').textContent = 'Please enter a password.'; return; }
+
+    $('loginError').textContent = '';
+    btn.disabled = true;
+
+    try {
+      const payload = await requestJson('/admin/login', {
+        method: 'POST',
+        data: { password: val },
+        headers: { 'Content-Type': 'application/json' }
+      });
+      $('loginPasswordInput').value = '';
+      showDashboard(payload.data || {});
+    } catch (error) {
+      $('loginError').textContent = error.message || 'Login failed.';
+    } finally {
+      btn.disabled = false;
+    }
   };
 
   $('loginBtn').addEventListener('click', doLogin);
-  $('loginPasswordInput').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
-
-  // Check if already authenticated (page refresh)
-  if (sessionStorage.getItem(ADMIN_AUTH_KEY) === '1') {
-    $('loginScreen').style.display = 'none';
-    $('dashboard').style.display = 'flex';
-    initDashboard();
-  }
+  $('loginPasswordInput').addEventListener('keydown', e => { if (e.key === 'Enter') void doLogin(); });
 
   // Logout
-  $('logoutBtn').addEventListener('click', () => {
-    sessionStorage.removeItem(ADMIN_AUTH_KEY);
+  $('logoutBtn').addEventListener('click', async () => {
+    try {
+      await requestJson('/admin/logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+    } catch (_) {
+      // Reloading still clears the UI state even if the request fails.
+    }
     location.reload();
   });
+
+  try {
+    const payload = await requestJson('/admin/bootstrap');
+    if (payload.authenticated) {
+      showDashboard(payload.data || {});
+      return;
+    }
+  } catch (_) {
+    // Keep the login screen visible if the bootstrap check fails.
+  }
+
+  showLogin();
 }
 
 /* ══════════════════════════════════════
@@ -646,13 +725,30 @@ function val(id) { const el = $(id); return el ? el.value : ''; }
 /* ══════════════════════════════════════
    11. SAVE
 ══════════════════════════════════════ */
-function saveAll() {
+async function saveAll(successMessage = 'All changes saved! Open your portfolio to see them live.') {
   collectDraft();
-  const ok = PortfolioData.save(draft);
-  if (ok) {
-    toast('All changes saved! Open your portfolio to see them live.', 'success');
-  } else {
-    toast('Failed to save. Storage may be full.', 'error');
+  const saveBtn = $('saveBtn');
+
+  if (saveBtn) saveBtn.disabled = true;
+
+  try {
+    const payload = await requestJson('/admin/portfolio-data', {
+      method: 'POST',
+      data: { data: draft }
+    });
+
+    replaceServerState(payload.data || {});
+    draft = PortfolioData.get();
+    toast(successMessage, 'success');
+    return true;
+  } catch (error) {
+    if (error.status === 401) {
+      showLogin('Your session expired. Please log in again.');
+    }
+    toast(error.message || 'Failed to save your changes.', 'error');
+    return false;
+  } finally {
+    if (saveBtn) saveBtn.disabled = false;
   }
 }
 
@@ -714,7 +810,7 @@ function loadInbox() {
     });
 }
 
-function escH(str) {
+function escHInline(str) {
   if (!str) return '';
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
@@ -1023,4 +1119,214 @@ function setAdminFavicon(meta) {
 }
 
 /* ── BOOT ── */
+loadInbox = async function () {
+  const container = $('inboxContainer');
+  const badge = $('inboxBadge');
+  if (!container) return;
+
+  container.innerHTML = '<p class="inbox-loading"><i class="fas fa-spinner fa-spin"></i> Loading messages...</p>';
+
+  try {
+    const messages = await requestJson('api_messages.php?action=get');
+
+    if (!messages || !messages.length) {
+      container.innerHTML = '<p class="inbox-empty"><i class="fas fa-inbox"></i><br>No messages yet. When visitors submit the contact form, they appear here.</p>';
+      if (badge) badge.style.display = 'none';
+      return;
+    }
+
+    if (badge) {
+      badge.textContent = messages.length;
+      badge.style.display = 'inline-block';
+    }
+
+    container.innerHTML = '';
+    [...messages].reverse().forEach(msg => {
+      const card = document.createElement('div');
+      card.className = 'inbox-card';
+      card.innerHTML = `
+        <div class="inbox-card-header">
+          <div class="inbox-meta">
+            <span class="inbox-name"><i class="fas fa-user"></i> ${escH(msg.name)}</span>
+            <span class="inbox-email"><i class="fas fa-envelope"></i> ${escH(msg.email)}</span>
+          </div>
+          <div class="inbox-time"><i class="fas fa-clock"></i> ${escH(msg.timestamp || '')}</div>
+        </div>
+        ${msg.subject ? `<div class="inbox-subject"><strong>Subject:</strong> ${escH(msg.subject)}</div>` : ''}
+        <div class="inbox-message">${escH(msg.message)}</div>
+        <div class="inbox-actions">
+          <a href="mailto:${escH(msg.email)}" class="btn-reply"><i class="fas fa-reply"></i> Reply via Email</a>
+          <button class="btn-delete-msg" data-id="${msg.id || ''}" data-idx="${msg.index || ''}"><i class="fas fa-trash"></i></button>
+        </div>`;
+      container.appendChild(card);
+    });
+
+    container.querySelectorAll('.btn-delete-msg').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.getAttribute('data-id');
+        const index = btn.getAttribute('data-idx');
+        const qs = id ? `id=${encodeURIComponent(id)}` : `index=${encodeURIComponent(index)}`;
+
+        try {
+          await requestJson(`api_messages.php?action=delete&${qs}`, { method: 'POST' });
+          await loadInbox();
+        } catch (error) {
+          toast(error.message || 'Could not delete the message.', 'error');
+        }
+      });
+    });
+  } catch (error) {
+    if (error.status === 401) {
+      container.innerHTML = '<p class="inbox-empty"><i class="fas fa-lock"></i><br>Please log in again to view inbox messages.</p>';
+      if (badge) badge.style.display = 'none';
+      return;
+    }
+
+    container.innerHTML = '<p class="inbox-empty"><i class="fas fa-server"></i><br>Could not connect to the server. Make sure Laravel and MySQL are running.</p>';
+  }
+};
+
+initSettings = function () {
+  const orbitSlider = $('heroOrbitSpeed');
+  const orbitVal = $('heroOrbitSpeedVal');
+  if (orbitSlider) {
+    orbitSlider.addEventListener('input', () => {
+      const v = parseInt(orbitSlider.value, 10);
+      if (orbitVal) orbitVal.textContent = v + 's';
+      if (!draft.hero) draft.hero = {};
+      draft.hero.orbitSpeed = v;
+    });
+  }
+
+  const brandInput = $('metaBrandText');
+  if (brandInput) {
+    brandInput.addEventListener('input', () => {
+      if (!draft.meta) draft.meta = {};
+      draft.meta.brandText = brandInput.value.trim();
+    });
+  }
+
+  $('changePwdBtn').addEventListener('click', async () => {
+    const cur = $('currentPwd').value;
+    const nw = $('newPwd').value;
+    const conf = $('confirmPwd').value;
+
+    try {
+      await requestJson('/admin/password', {
+        method: 'POST',
+        data: {
+          current_password: cur,
+          new_password: nw,
+          new_password_confirmation: conf
+        }
+      });
+      $('currentPwd').value = '';
+      $('newPwd').value = '';
+      $('confirmPwd').value = '';
+      toast('Password updated successfully!', 'success');
+    } catch (error) {
+      toast(error.message || 'Could not update the password.', 'error');
+    }
+  });
+
+  $('hardResetBtn').addEventListener('click', async () => {
+    if (!confirm('Reset ALL portfolio content to factory defaults?\n\nThis cannot be undone.')) return;
+    draft = PortfolioData.defaults();
+    populateForms();
+    await saveAll('Portfolio reset to factory defaults.');
+  });
+
+  $('resetDataBtn').addEventListener('click', () => {
+    if (!confirm('Discard all unsaved changes and reload the last saved data?')) return;
+    draft = PortfolioData.get();
+    populateForms();
+    toast('Reloaded from saved data.', 'warning');
+  });
+};
+
+processImageFile = async function (file, preview, statusId, imageKey) {
+  const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+  if (!validTypes.includes(file.type)) {
+    setUploadStatus(statusId, 'Invalid type. Use JPG, PNG, WEBP or GIF.', 'err');
+    return;
+  }
+  if (file.size > 8 * 1024 * 1024) {
+    setUploadStatus(statusId, 'File too large. Max 8 MB.', 'err');
+    return;
+  }
+
+  const previousSrc = draft.images?.[imageKey] || preview.src;
+  setUploadStatus(statusId, 'Uploading...', 'info');
+  preview.src = await readFileAsDataURL(file);
+
+  const phpOk = await tryPhpUpload(file, imageKey, statusId);
+  if (phpOk) return;
+
+  preview.src = previousSrc;
+  setUploadStatus(statusId, 'Upload failed. Please make sure you are logged in and the server is running.', 'err');
+};
+
+tryPhpUpload = async function (file, imageKey, statusId) {
+  try {
+    const fd = new FormData();
+    fd.append('image', file);
+    fd.append('imageKey', imageKey);
+    const old = draft.images?.[imageKey] || '';
+    if (old.startsWith('uploads/')) fd.append('replaces', old.replace('uploads/', ''));
+
+    const headers = csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {};
+    const res = await fetch('upload.php', { method: 'POST', body: fd, headers });
+    const ct = res.headers.get('content-type') || '';
+
+    if (res.status === 401) {
+      setUploadStatus(statusId, 'Your session expired. Please log in again.', 'err');
+      return false;
+    }
+
+    if (!res.ok || !ct.includes('json')) return false;
+
+    const json = await res.json();
+    if (json.success && json.url) {
+      if (!draft.images) draft.images = {};
+      draft.images[imageKey] = json.url;
+      setUploadStatus(statusId, 'Uploaded to server. Click Save Changes to persist.', 'ok');
+      return true;
+    }
+
+    setUploadStatus(statusId, 'Server: ' + (json.error || 'unknown error'), 'err');
+    return false;
+  } catch (_) {
+    return false;
+  }
+};
+
+initDashboard = function () {
+  draft = PortfolioData.get();
+  if (!draft.images) draft.images = { hero: 'profile.png', about: 'profile.png' };
+
+  setAdminFavicon(draft.meta);
+  populateForms();
+  initImageUploads();
+  initSkillsTab();
+  initSettings();
+  initSidebarToggle();
+
+  document.querySelectorAll('.nav-item[data-panel]').forEach(btn => {
+    btn.addEventListener('click', () => switchPanel(btn.getAttribute('data-panel')));
+  });
+
+  document.querySelectorAll('.overview-card[data-goto]').forEach(card => {
+    card.addEventListener('click', () => switchPanel(card.getAttribute('data-goto')));
+  });
+
+  $('saveBtn').addEventListener('click', () => { void saveAll(); });
+
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      void saveAll();
+    }
+  });
+};
+
 document.addEventListener('DOMContentLoaded', initAuth);

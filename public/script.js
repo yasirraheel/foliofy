@@ -488,26 +488,6 @@ function initSwiper() {
       });
     } catch (_) { /* silent */ }
 
-    // 2. Fire WhatsApp notification via server-side proxy (avoids CORS)
-    try {
-      const data = PortfolioData.get();
-      const wa   = data?.contact?.whatsappApi;
-      if (wa && wa.enabled && wa.apiKey && wa.accountName && wa.targetNumber) {
-        const waMsg =
-          `📬 *New Portfolio Contact!*\n\n` +
-          `*Name:* ${name}\n` +
-          `*Email:* ${email}\n` +
-          (subject ? `*Subject:* ${subject}\n` : '') +
-          `*Message:*\n${message}`;
-
-        await fetch('wa_proxy.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ apiKey: wa.apiKey, accountName: wa.accountName, number: wa.targetNumber, message: waMsg })
-        });
-      }
-    } catch (_) { /* silent */ }
-
     // Reset UI
     btn.disabled = false;
     btn.querySelector('.btn-text').textContent = 'Send Message';

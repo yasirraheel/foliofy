@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Legacy;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 
 class UploadController extends Controller
@@ -23,6 +25,10 @@ class UploadController extends Controller
 
         if (! $request->isMethod('post')) {
             return response()->json(['error' => 'Method not allowed'], 405, self::CORS_HEADERS);
+        }
+
+        if (! $this->adminUser()) {
+            return response()->json(['error' => 'Unauthenticated.'], 401, self::CORS_HEADERS);
         }
 
         if (! $request->hasFile('image')) {
@@ -90,5 +96,16 @@ class UploadController extends Controller
             'success' => true,
             'url' => $destUrl,
         ], 200, self::CORS_HEADERS);
+    }
+
+    private function adminUser(): ?User
+    {
+        $user = Auth::user();
+
+        if (! $user instanceof User || ! $user->is_admin) {
+            return null;
+        }
+
+        return $user;
     }
 }
