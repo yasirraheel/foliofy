@@ -1,124 +1,70 @@
-<div align="center">
-  <h1>🚀 Foliofy: Dynamic Portfolio System</h1>
-  <p><strong>A Next-Generation, Data-Driven Personal Portfolio & Admin Dashboard</strong></p>
-  
-  <p>
-    <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white" alt="HTML5" />
-    <img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white" alt="CSS3" />
-    <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript" />
-    <img src="https://img.shields.io/badge/AOS_Animations-000000?style=for-the-badge&logo=css3&logoColor=white" alt="AOS Animations" />
-  </p>
-</div>
+# Foliofy Laravel Migration
 
-<br />
+This repository now runs as a full Laravel application created through Composer and then adapted to preserve the original Foliofy portfolio behavior and UI.
 
-## 🌟 Overview
+## What Stayed The Same
 
-**Foliofy** is a state-of-the-art, fully dynamic portfolio template designed for developers, designers, and creatives who want to showcase their work brilliantly with zero maintenance overhead. Built using vanilla web technologies (HTML, CSS, JS), it scales elegantly from a simple static site to a fully synced GitHub portfolio.
+- Public portfolio UI and markup
+- Admin dashboard UI and interactions
+- Frontend JavaScript behavior
+- Legacy browser-facing URLs:
+  - `/`
+  - `/index.html`
+  - `/admin`
+  - `/admin.html`
+- Legacy endpoint URLs used by the existing JavaScript:
+  - `/api_messages.php`
+  - `/upload.php`
+  - `/wa_proxy.php`
 
-The ecosystem includes a beautiful front-end displaying your projects, skills, and experience, paired with a dedicated **Admin Interface** (`admin.html`) enabling seamless configuration. The system dynamically reads from a centralized `data.js` file, meaning you only have to update a single file (or use the built-in admin panel) to update your entire portfolio instantly.
+## What Changed
 
----
+- The project is now a real Laravel application with `artisan`, `app/`, `bootstrap/`, `config/`, `database/`, `public/`, `resources/`, `routes/`, `storage/`, `tests/`, and `vendor/`.
+- The old standalone PHP endpoint behavior now runs through Laravel controllers.
+- The original HTML was copied into Laravel-served files so the UI remains the same.
+- Static assets were moved into `public/` for Laravel delivery.
 
-## ✨ Key Features
+## Project Layout
 
-- **🔄 GitHub Synchronization Ready**: Architected to synchronize and parse READMEs from all your GitHub repositories, ensuring every single project is dynamically displayed without manual copy-pasting.
-- **🎛️ Integrated Admin Dashboard**: A sleek, easy-to-use admin panel (`admin.html`) to manage skills, experience, projects, and personal data securely and efficiently.
-- **🌗 Dark/Light Mode Engine**: Seamless client-side theme switching with persistent local storage.
-- **🎨 Premium Animations & UI**: Packed with micro-interactions, smooth AOS-powered scroll animations, Swiper.js carousels, and an immersive custom cursor.
-- **📱 Fully Responsive**: Pixel-perfect scaling on desktop, tablet, and mobile devices.
-- **⚡ Blazing Fast Performance**: Zero-build-step vanilla JavaScript rendering engine (`renderer.js`) ensuring minimal overhead and maximum SEO reach.
+- `routes/web.php`
+  - Laravel routes for the public page, admin page, and legacy endpoint URLs
+- `app/Http/Controllers/Legacy`
+  - Laravel replacements for `api_messages.php`, `upload.php`, and `wa_proxy.php`
+- `resources/views/portfolio.blade.php`
+  - Original portfolio HTML served by Laravel
+- `resources/views/admin.blade.php`
+  - Original admin HTML served by Laravel
+- `public/`
+  - CSS, JS, images, and other browser assets
 
----
+## Requirements
 
-## 🛠️ Architecture & Tech Stack
+- PHP 8.3+
+- Composer 2+
 
-Foliofy is proudly built using modern web standards without enforcing heavy frontend frameworks:
+PHP and Composer were installed globally for this machine during the migration. If a currently open terminal still does not recognize `php` or `composer`, open a fresh terminal window so it picks up the updated PATH.
 
-- **Frontend Core**: HTML5, Vanilla JavaScript (ES6+), Vanilla CSS3 / SCSS methodologies
-- **Dynamic Rendering**: Custom templating via `renderer.js` extracting state from `data.js`
-- **Libraries & Assets**: 
-  - [AOS (Animate On Scroll)](https://michalsnik.github.io/aos/) for scroll reveals
-  - [Swiper.js](https://swiperjs.com/) for touch-friendly carousels
-  - [Font Awesome 6](https://fontawesome.com/) for crisp vector icons
-  - [Google Fonts](https://fonts.google.com/) (Outfit & JetBrains Mono)
-
----
-
-## 🚀 Getting Started
-
-### 1. Installation
-
-Getting your portfolio up and running requires no build steps or bundlers. Simply clone the repository and open the index file.
+## Run Locally
 
 ```bash
-# Clone the repository
-git clone https://github.com/yasirraheel/foliofy.git
-
-# Navigate into the project directory
-cd foliofy
+composer install
+php artisan serve
 ```
 
-### 2. Running Locally
+Then open:
 
-Since Foliofy uses vanilla web technologies, you can serve it using any local web server, or simply by opening `index.html` in your browser. 
+- `http://127.0.0.1:8000/`
+- `http://127.0.0.1:8000/admin.html`
 
-*(If you are utilizing GitHub API calls or ES modules, using a simple local server like Live Server for VSCode is recommended to avoid CORS issues).*
+## Testing
 
-### 3. Customizing Your Data
+```bash
+php artisan test
+```
 
-All portfolio data is securely decoupled from the UI. To customize the portfolio:
-1. Open `data.js` in your favorite editor.
-2. Update the JSON objects to reflect your personal details, skills, experiences, and specific GitHub repository data.
-3. Refresh your browser to view the changes rendered instantly via `renderer.js`.
+## Notes
 
----
-
-## ⚙️ The Admin Dashboard
-
-Foliofy includes a secret weapon: **The Admin Editor**. 
-
-Navigate to `admin.html` in your browser to access the control center. From here, you can visually update your portfolio strings, add new projects, tweak your theme configurations, and export your validated schema back into `data.js`.
-
----
-
-## 📸 Screenshots
-
-*(Replace these with direct links to your screenshots if hosted externally)*
-
-| Hero Display | Projects Section |
-|:---:|:---:|
-| <img src="preview_hero.png" width="400" alt="Hero Section Preview"> | <img src="preview_projects.png" width="400" alt="Projects Preview"> |
-
-| Skills Overview | About Section |
-|:---:|:---:|
-| <img src="preview_skills.png" width="400" alt="Skills Preview"> | <img src="preview_about.png" width="400" alt="About App Preview"> |
-
----
-
-## 🤝 Contributing
-
-While Foliofy was built as a personal portfolio system, forks and contributions are welcome! If you have ideas on how to make the GitHub synchronization even more robust or the admin UI smoother:
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
----
-
-## 📝 License
-
-Distributed under the MIT License. See `LICENSE` for more information.
-
----
-
-<div align="center">
-  <p>Built with ❤️ by <strong>Yasir Raheel</strong></p>
-  <p>
-    <a href="https://github.com/yasirraheel">GitHub</a> •
-    <a href="#">LinkedIn</a> •
-    <a href="#">Twitter</a>
-  </p>
-</div>
+- Portfolio content editing still behaves the same way as before: the admin dashboard stores portfolio data in browser localStorage, while message inbox and image uploads are server-backed.
+- Uploaded images are stored under `public/uploads/`.
+- Contact messages are stored in Laravel storage through the configured messages path.
+- The original root-level static source files were kept during migration as reference material while the Laravel version was wired in.
