@@ -74,10 +74,11 @@ class PortfolioApplicationTest extends TestCase
             ->assertOk()
             ->assertSee('window.__PORTFOLIO_DATA__=', false)
             ->assertSee('"name":"Muhammad Asif Shabbir"', false)
-            ->assertSee('"email":"yasirraheel@github.com"', false)
-            ->assertSee('data.js?v=10', false)
-            ->assertSee('renderer.js?v=10', false)
-            ->assertSee('script.js?v=10', false);
+            ->assertSee('"email":"islammujahid921@gmail.com"', false)
+            ->assertSee('"portfolioUrl":"https://foliofy.me/"', false)
+            ->assertSee('data.js?v=11', false)
+            ->assertSee('renderer.js?v=11', false)
+            ->assertSee('script.js?v=11', false);
 
         $this->assertStringContainsString('no-store', (string) $response->headers->get('Cache-Control'));
         $this->assertStringContainsString('no-cache', (string) $response->headers->get('Cache-Control'));
@@ -159,9 +160,12 @@ class PortfolioApplicationTest extends TestCase
             'meta' => [
                 'name' => 'Updated Name',
                 'siteTitle' => 'Updated Portfolio',
+                'siteKeywords' => 'networking, support',
             ],
             'contact' => [
                 'email' => 'hello@example.com',
+                'portfolioUrl' => 'https://example.com',
+                'resumeUrl' => 'https://example.com/resume.pdf',
                 'whatsappApi' => [
                     'enabled' => true,
                     'apiKey' => 'abc123',
@@ -180,10 +184,13 @@ class PortfolioApplicationTest extends TestCase
             'id' => 1,
             'name' => 'Updated Name',
             'site_title' => 'Updated Portfolio',
+            'site_keywords' => 'networking, support',
         ]);
         $this->assertDatabaseHas('portfolio_contact', [
             'id' => 1,
             'email' => 'hello@example.com',
+            'portfolio_url' => 'https://example.com',
+            'resume_url' => 'https://example.com/resume.pdf',
             'whatsapp_enabled' => 1,
             'whatsapp_account_name' => 'portfolio',
             'whatsapp_target_number' => '923001234567',
@@ -201,20 +208,24 @@ class PortfolioApplicationTest extends TestCase
         ]);
         $this->assertDatabaseHas('portfolio_hero', [
             'id' => 1,
-            'highlight_name' => 'Asif Shabbir',
+            'highlight_name' => 'Shabbir',
         ]);
         $this->assertDatabaseHas('portfolio_about', [
             'id' => 1,
-            'degree' => 'Computer Science',
+            'degree' => 'BS IT - In Progress',
         ]);
         $this->assertDatabaseHas('portfolio_contact', [
             'id' => 1,
-            'email' => 'yasirraheel@github.com',
+            'email' => 'islammujahid921@gmail.com',
+            'portfolio_url' => 'https://foliofy.me/',
         ]);
         $this->assertGreaterThan(0, DB::table('portfolio_skills')->count());
         $this->assertGreaterThan(0, DB::table('portfolio_projects')->count());
         $this->assertGreaterThan(0, DB::table('portfolio_experiences')->count());
-        $this->assertGreaterThan(0, DB::table('portfolio_testimonials')->count());
+        $this->assertGreaterThan(0, DB::table('portfolio_achievements')->count());
+        $this->assertGreaterThan(0, DB::table('portfolio_education')->count());
+        $this->assertGreaterThan(0, DB::table('portfolio_languages')->count());
+        $this->assertDatabaseCount('portfolio_testimonials', 0);
     }
 
     public function test_contact_messages_are_saved_in_mysql_and_manageable_from_admin(): void

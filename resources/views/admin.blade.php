@@ -74,8 +74,11 @@
       <button class="nav-item" data-panel="experience" id="navExperience">
         <i class="fas fa-briefcase"></i><span>Experience</span>
       </button>
-      <button class="nav-item" data-panel="testimonials" id="navTestimonials">
-        <i class="fas fa-quote-right"></i><span>Testimonials</span>
+      <button class="nav-item" data-panel="achievements" id="navAchievements">
+        <i class="fas fa-award"></i><span>Achievements</span>
+      </button>
+      <button class="nav-item" data-panel="education" id="navEducation">
+        <i class="fas fa-graduation-cap"></i><span>Education</span>
       </button>
       <button class="nav-item" data-panel="contact" id="navContact">
         <i class="fas fa-envelope"></i><span>Contact</span>
@@ -137,11 +140,12 @@
         </div>
         <div class="overview-grid">
           <div class="overview-card" data-goto="hero"><i class="fas fa-home"></i><h3>Hero</h3><p>Name, title, description, stats</p></div>
-          <div class="overview-card" data-goto="about"><i class="fas fa-user"></i><h3>About</h3><p>Bio, info, experience badge</p></div>
-          <div class="overview-card" data-goto="skills"><i class="fas fa-tools"></i><h3>Skills</h3><p>Frontend, backend, tools</p></div>
+          <div class="overview-card" data-goto="about"><i class="fas fa-user"></i><h3>About</h3><p>Bio, background, and profile summary</p></div>
+          <div class="overview-card" data-goto="skills"><i class="fas fa-tools"></i><h3>Skills</h3><p>Networking, web, Android, tools</p></div>
           <div class="overview-card" data-goto="projects"><i class="fas fa-folder-open"></i><h3>Projects</h3><p>Showcase your best work</p></div>
-          <div class="overview-card" data-goto="experience"><i class="fas fa-briefcase"></i><h3>Experience</h3><p>Work history & education</p></div>
-          <div class="overview-card" data-goto="testimonials"><i class="fas fa-quote-right"></i><h3>Testimonials</h3><p>Client reviews & feedback</p></div>
+          <div class="overview-card" data-goto="experience"><i class="fas fa-briefcase"></i><h3>Experience</h3><p>Military and technical background</p></div>
+          <div class="overview-card" data-goto="achievements"><i class="fas fa-award"></i><h3>Achievements</h3><p>Training, honors, commendations</p></div>
+          <div class="overview-card" data-goto="education"><i class="fas fa-graduation-cap"></i><h3>Education</h3><p>Education, certification, languages</p></div>
           <div class="overview-card" data-goto="contact"><i class="fas fa-envelope"></i><h3>Contact</h3><p>Email, phone, social links</p></div>
           <div class="overview-card" data-goto="settings"><i class="fas fa-cog"></i><h3>Settings</h3><p>Site meta & password</p></div>
         </div>
@@ -172,7 +176,7 @@
           </div>
           <div class="form-group full-width">
             <label>Description <span class="hint">HTML allowed, e.g. &lt;strong&gt;text&lt;/strong&gt;</span></label>
-            <textarea id="heroDescription" rows="3" placeholder="A passionate Full-Stack Developer..."></textarea>
+            <textarea id="heroDescription" rows="3" placeholder="Networking-focused profile summary..."></textarea>
           </div>
         </div>
 
@@ -226,11 +230,11 @@
         <div class="form-grid">
           <div class="form-group">
             <label>Heading Main Text</label>
-            <input type="text" id="aboutHeading" placeholder="Full-Stack Developer &" />
+            <input type="text" id="aboutHeading" placeholder="Retired Army Professional &" />
           </div>
           <div class="form-group">
             <label>Heading Highlight (Gradient)</label>
-            <input type="text" id="aboutHeadingHighlight" placeholder="Creative Thinker" />
+            <input type="text" id="aboutHeadingHighlight" placeholder="Networking-Focused IT Candidate" />
           </div>
           <div class="form-group full-width">
             <label>Bio Paragraph 1 <span class="hint">HTML allowed</span></label>
@@ -289,16 +293,20 @@
       <div class="panel" id="panel-skills">
         <div class="panel-header">
           <h2 class="panel-title">Skills Section</h2>
-          <p class="panel-subtitle">Manage your skills across all three tabs</p>
+          <p class="panel-subtitle">Manage your networking-first skill groups</p>
         </div>
         <div class="tabs-row">
-          <button class="tab-btn active" data-skillstab="frontend" id="skillTabFrontend">Frontend</button>
-          <button class="tab-btn" data-skillstab="backend" id="skillTabBackend">Backend</button>
-          <button class="tab-btn" data-skillstab="tools" id="skillTabTools">Tools & Design</button>
+          <button class="tab-btn active" data-skillstab="networking" id="skillTabNetworking">Networking</button>
+          <button class="tab-btn" data-skillstab="webDevelopment" id="skillTabWebDevelopment">Web Development</button>
+          <button class="tab-btn" data-skillstab="androidDevelopment" id="skillTabAndroidDevelopment">Android Development</button>
+          <button class="tab-btn" data-skillstab="productivityTools" id="skillTabProductivityTools">Productivity Tools</button>
+          <button class="tab-btn" data-skillstab="professionalStrengths" id="skillTabProfessionalStrengths">Professional Strengths</button>
         </div>
-        <div class="skill-tab-content active" id="skillContent-frontend"><div class="skill-list" id="skillList-frontend"></div></div>
-        <div class="skill-tab-content" id="skillContent-backend"><div class="skill-list" id="skillList-backend"></div></div>
-        <div class="skill-tab-content" id="skillContent-tools"><div class="skill-list" id="skillList-tools"></div></div>
+        <div class="skill-tab-content active" id="skillContent-networking"><div class="skill-list" id="skillList-networking"></div></div>
+        <div class="skill-tab-content" id="skillContent-webDevelopment"><div class="skill-list" id="skillList-webDevelopment"></div></div>
+        <div class="skill-tab-content" id="skillContent-androidDevelopment"><div class="skill-list" id="skillList-androidDevelopment"></div></div>
+        <div class="skill-tab-content" id="skillContent-productivityTools"><div class="skill-list" id="skillList-productivityTools"></div></div>
+        <div class="skill-tab-content" id="skillContent-professionalStrengths"><div class="skill-list" id="skillList-professionalStrengths"></div></div>
         <div class="add-item-bar">
           <button class="btn-add-item" id="addSkillBtn"><i class="fas fa-plus-circle"></i> Add Skill</button>
         </div>
@@ -319,8 +327,8 @@
       <!-- ── EXPERIENCE PANEL ── -->
       <div class="panel" id="panel-experience">
         <div class="panel-header">
-          <h2 class="panel-title">Experience & Education</h2>
-          <p class="panel-subtitle">Your work history and academic background</p>
+          <h2 class="panel-title">Military & Technical Background</h2>
+          <p class="panel-subtitle">Translate military service and current technical focus for civilian recruiters</p>
         </div>
         <div class="list-container" id="experienceList"></div>
         <div class="add-item-bar">
@@ -328,15 +336,35 @@
         </div>
       </div>
 
-      <!-- ── TESTIMONIALS PANEL ── -->
-      <div class="panel" id="panel-testimonials">
+      <!-- ── ACHIEVEMENTS PANEL ── -->
+      <div class="panel" id="panel-achievements">
         <div class="panel-header">
-          <h2 class="panel-title">Testimonials</h2>
-          <p class="panel-subtitle">Client reviews and feedback</p>
+          <h2 class="panel-title">Achievements & Training</h2>
+          <p class="panel-subtitle">Courses, rankings, honors, certificates, and commendations</p>
         </div>
-        <div class="list-container" id="testimonialsList"></div>
+        <div class="list-container" id="achievementsList"></div>
         <div class="add-item-bar">
-          <button class="btn-add-item" id="addTestimonialBtn"><i class="fas fa-plus-circle"></i> Add Testimonial</button>
+          <button class="btn-add-item" id="addAchievementBtn"><i class="fas fa-plus-circle"></i> Add Achievement</button>
+        </div>
+      </div>
+
+      <!-- ── EDUCATION PANEL ── -->
+      <div class="panel" id="panel-education">
+        <div class="panel-header">
+          <h2 class="panel-title">Education, Certifications & Languages</h2>
+          <p class="panel-subtitle">Academic status, certification preparation, and language profile</p>
+        </div>
+
+        <div class="section-divider"><span>Education & Certifications</span></div>
+        <div class="list-container" id="educationList"></div>
+        <div class="add-item-bar">
+          <button class="btn-add-item" id="addEducationBtn"><i class="fas fa-plus-circle"></i> Add Entry</button>
+        </div>
+
+        <div class="section-divider"><span>Languages</span></div>
+        <div class="list-container" id="languagesList"></div>
+        <div class="add-item-bar">
+          <button class="btn-add-item" id="addLanguageBtn"><i class="fas fa-plus-circle"></i> Add Language</button>
         </div>
       </div>
 
@@ -366,6 +394,14 @@
           <div class="form-group">
             <label><i class="fas fa-map-marker-alt"></i> Location</label>
             <input type="text" id="contactLocation" />
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-globe"></i> Portfolio URL</label>
+            <input type="url" id="contactPortfolioUrl" placeholder="https://foliofy.me/" />
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-file-lines"></i> Resume URL</label>
+            <input type="url" id="contactResumeUrl" placeholder="Add when available" />
           </div>
         </div>
 
@@ -457,6 +493,10 @@
             <textarea id="metaSiteDesc" rows="2"></textarea>
           </div>
           <div class="form-group full-width">
+            <label>Meta Keywords (SEO)</label>
+            <textarea id="metaSiteKeywords" rows="2"></textarea>
+          </div>
+          <div class="form-group full-width">
             <label>Footer Tagline</label>
             <input type="text" id="footerTagline" />
           </div>
@@ -494,7 +534,7 @@
   </div>
 </div>
 
-<script src="data.js?v=10"></script>
-<script src="admin.js?v=10"></script>
+<script src="data.js?v=11"></script>
+<script src="admin.js?v=11"></script>
 </body>
 </html>

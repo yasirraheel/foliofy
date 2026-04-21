@@ -198,7 +198,7 @@
   // Use words from renderer (set via window._portfolioTypedWords) or fallback
   const words = (window._portfolioTypedWords && window._portfolioTypedWords.length)
     ? window._portfolioTypedWords
-    : ['Web Applications','Mobile Experiences','UI/UX Designs','REST APIs','Beautiful Interfaces','Digital Products'];
+    : ['Network Support', 'Router and Switch Labs', 'Packet Tracer Practice', 'Troubleshooting', 'IT Support'];
   let wordIdx = 0, charIdx = 0, deleting = false;
 
   const type = () => {
@@ -259,9 +259,11 @@
 
 /* ─── 9. SKILLS TAB SWITCHING + BAR ANIMATION ─── */
 (function initSkills() {
-  const tabs     = document.querySelectorAll('.skills-tab');
+  const tabs = document.querySelectorAll('.skills-tab');
   const contents = document.querySelectorAll('.skills-content');
-  let barsAnimated = { frontend: false, backend: false, tools: false };
+  const barsAnimated = new Set();
+
+  if (!tabs.length || !contents.length) return;
 
   const animateBars = (container) => {
     container.querySelectorAll('.skill-bar').forEach(bar => {
@@ -278,21 +280,24 @@
       const content = document.getElementById('tabContent' + capitalize(target));
       if (content) {
         content.classList.add('active');
-        if (!barsAnimated[target]) {
-          barsAnimated[target] = true;
+        if (!barsAnimated.has(target)) {
+          barsAnimated.add(target);
           setTimeout(() => animateBars(content), 50);
         }
       }
     });
   });
 
-  // Animate initial (frontend) bars when section enters viewport
+  // Animate initial bars when the section enters the viewport
   const skillsSection = document.getElementById('skills');
   const io = new IntersectionObserver((entries) => {
-    if (entries[0].isIntersecting && !barsAnimated.frontend) {
-      barsAnimated.frontend = true;
-      const fc = document.getElementById('tabContentFrontend');
-      if (fc) animateBars(fc);
+    if (entries[0].isIntersecting) {
+      const firstTab = document.querySelector('.skills-tab.active') || document.querySelector('.skills-tab');
+      const target = firstTab?.getAttribute('data-tab');
+      if (!target || barsAnimated.has(target)) return;
+      barsAnimated.add(target);
+      const content = document.getElementById('tabContent' + capitalize(target));
+      if (content) animateBars(content);
     }
   }, { threshold: 0.2 });
   if (skillsSection) io.observe(skillsSection);
@@ -333,9 +338,11 @@ function initProjectFilter() {
 /* ─── 11. TESTIMONIALS SWIPER (init after renderer populates slides) ─── */
 function initSwiper() {
   if (typeof Swiper === 'undefined') return;
+  const root = document.querySelector('.testimonials-swiper');
+  if (!root) return;
   // Destroy previous instance if re-initialising
   if (window._swiperInstance) { window._swiperInstance.destroy(true, true); }
-  window._swiperInstance = new Swiper('.testimonials-swiper', {
+  window._swiperInstance = new Swiper(root, {
     slidesPerView: 1,
     spaceBetween: 24,
     loop: true,

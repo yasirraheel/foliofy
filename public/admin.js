@@ -11,6 +11,14 @@ const $ = id => document.getElementById(id);
 const csrfToken = window.__CSRF_TOKEN__ || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 let dashboardInitialized = false;
 
+const SKILL_TABS = [
+  { key: 'networking', label: 'Networking' },
+  { key: 'webDevelopment', label: 'Web Development' },
+  { key: 'androidDevelopment', label: 'Android Development' },
+  { key: 'productivityTools', label: 'Productivity Tools' },
+  { key: 'professionalStrengths', label: 'Professional Strengths' }
+];
+
 const toast = (msg, type = 'success') => {
   const c = $('toastContainer');
   const t = document.createElement('div');
@@ -167,8 +175,8 @@ function switchPanel(name) {
   // Breadcrumb
   const labels = {
     overview:'Overview', hero:'Hero', about:'About', skills:'Skills',
-    projects:'Projects', experience:'Experience', testimonials:'Testimonials',
-    contact:'Contact', inbox:'Inbox', settings:'Settings'
+    projects:'Projects', experience:'Experience', achievements:'Achievements',
+    education:'Education', contact:'Contact', inbox:'Inbox', settings:'Settings'
   };
   $('breadcrumbSection').textContent = labels[name] || name;
   currentPanel = name;
@@ -191,12 +199,20 @@ let draft = {};
 function populateForms() {
   const d = draft;
 
+  ensureSkillBuckets();
+  if (!Array.isArray(d.achievements)) d.achievements = [];
+  if (!Array.isArray(d.education)) d.education = [];
+  if (!Array.isArray(d.languages)) d.languages = [];
+  if (!d.contact) d.contact = {};
+  if (!d.contact.social) d.contact.social = {};
+
   /* META / SETTINGS */
   setValue('metaName',      d.meta?.name);
   setValue('metaRole',      d.meta?.role);
   setValue('metaBrandText', d.meta?.brandText);
   setValue('metaSiteTitle', d.meta?.siteTitle);
   setValue('metaSiteDesc',  d.meta?.siteDesc);
+  setValue('metaSiteKeywords', d.meta?.siteKeywords);
   setValue('footerTagline', d.footer?.tagline);
 
   /* HERO */
@@ -226,9 +242,7 @@ function populateForms() {
   setValue('aboutExpYears',         d.about?.expYears);
 
   /* SKILLS */
-  buildSkillsList('frontend');
-  buildSkillsList('backend');
-  buildSkillsList('tools');
+  SKILL_TABS.forEach(({ key }) => buildSkillsList(key));
 
   /* PROJECTS */
   buildProjectsList();
@@ -236,8 +250,10 @@ function populateForms() {
   /* EXPERIENCE */
   buildExperienceList();
 
-  /* TESTIMONIALS */
-  buildTestimonialsList();
+  /* ACHIEVEMENTS / EDUCATION */
+  buildAchievementsList();
+  buildEducationList();
+  buildLanguagesList();
 
   /* CONTACT */
   setValue('contactHeading',  d.contact?.heading);
@@ -245,6 +261,8 @@ function populateForms() {
   setValue('contactEmail',    d.contact?.email);
   setValue('contactPhone',    d.contact?.phone);
   setValue('contactLocation', d.contact?.location);
+  setValue('contactPortfolioUrl', d.contact?.portfolioUrl);
+  setValue('contactResumeUrl', d.contact?.resumeUrl);
   setValue('socialGithub',    d.contact?.social?.github);
   setValue('socialLinkedin',  d.contact?.social?.linkedin);
   setValue('socialTwitter',   d.contact?.social?.twitter);
@@ -327,9 +345,19 @@ function buildTagChips(listId, inputId, addBtnId, tags, onChange) {
 /* ══════════════════════════════════════
    5. SKILLS LIST
 ══════════════════════════════════════ */
-let activeSkillTab = 'frontend';
+function ensureSkillBuckets() {
+  if (!draft.skills) draft.skills = {};
+  SKILL_TABS.forEach(({ key }) => {
+    if (!Array.isArray(draft.skills[key])) {
+      draft.skills[key] = [];
+    }
+  });
+}
+
+let activeSkillTab = SKILL_TABS[0].key;
 
 function buildSkillsList(tab) {
+  ensureSkillBuckets();
   const container = $(`skillList-${tab}`);
   if (!container) return;
   container.innerHTML = '';
@@ -395,7 +423,8 @@ function initSkillsTab() {
   });
 
   $('addSkillBtn').addEventListener('click', () => {
-    draft.skills[activeSkillTab].push({ name: 'New Skill', iconClass: 'fas fa-code', iconColor: '#7c3aed', level: 70 });
+    ensureSkillBuckets();
+    draft.skills[activeSkillTab].push({ name: 'New Skill', iconClass: 'fas fa-code', iconColor: '#7c3aed', level: 100 });
     buildSkillsList(activeSkillTab);
     // Scroll to new item
     const list = $(`skillList-${activeSkillTab}`);
@@ -543,45 +572,124 @@ $('addExperienceBtn')?.addEventListener('click', () => {
 });
 
 /* ══════════════════════════════════════
-   8. TESTIMONIALS LIST
+   8. ACHIEVEMENTS / EDUCATION / LANGUAGES
 ══════════════════════════════════════ */
-function buildTestimonialsList() {
-  const container = $('testimonialsList');
+function buildAchievementsList() {
+  const container = $('achievementsList');
+  if (!container) return;
   container.innerHTML = '';
-  (draft.testimonials || []).forEach((t, i) => container.appendChild(makeTestimonialCard(i, t)));
+  (draft.achievements || []).forEach((item, i) => container.appendChild(makeAchievementCard(i, item)));
 }
 
-function makeTestimonialCard(i, t) {
+function makeAchievementCard(i, item) {
   const wrap = document.createElement('div');
   wrap.innerHTML = `
     <div class="item-form-grid">
-      <div class="full-width"><label>Quote Text</label><textarea id="testi-text-${i}" rows="4">${escH(t.text)}</textarea></div>
-      <div><label>Author Name</label><input type="text" id="testi-name-${i}" value="${escH(t.authorName)}" /></div>
-      <div><label>Author Role</label><input type="text" id="testi-role-${i}" value="${escH(t.authorRole)}" /></div>
-      <div><label>Author Initials (2 letters)</label><input type="text" id="testi-init-${i}" value="${escH(t.initials)}" maxlength="2" /></div>
-      <div><label>Avatar Gradient CSS <span style="color:var(--text-muted);">(optional)</span></label>
-        <input type="text" id="testi-grad-${i}" value="${escH(t.avatarGradient)}" placeholder="linear-gradient(135deg,#f093fb,#f5576c)" /></div>
+      <div><label>Title</label><input type="text" id="achievement-title-${i}" value="${escH(item.title)}" /></div>
+      <div><label>Subtitle</label><input type="text" id="achievement-subtitle-${i}" value="${escH(item.subtitle)}" /></div>
+      <div><label>Period / Year</label><input type="text" id="achievement-period-${i}" value="${escH(item.period)}" /></div>
+      <div><label>Highlight</label><input type="text" id="achievement-highlight-${i}" value="${escH(item.highlight)}" /></div>
+      <div class="full-width"><label>Description</label><textarea id="achievement-description-${i}" rows="3">${escH(item.description)}</textarea></div>
     </div>`;
 
   setTimeout(() => {
-    const fields = [['text','text'],['name','authorName'],['role','authorRole'],['init','initials'],['grad','avatarGradient']];
-    fields.forEach(([sfx, key]) => {
-      const el = $(`testi-${sfx}-${i}`);
-      if (el) el.addEventListener('input', e => {
-        draft.testimonials[i][key] = e.target.value;
-        const nameEl = $(`testi-name-${i}`); if (nameEl) updateCardTitle(wrap, nameEl.value);
+    [['title', 'title'], ['subtitle', 'subtitle'], ['period', 'period'], ['highlight', 'highlight'], ['description', 'description']]
+      .forEach(([suffix, key]) => {
+        const el = $(`achievement-${suffix}-${i}`);
+        if (el) el.addEventListener('input', (e) => {
+          draft.achievements[i][key] = e.target.value;
+          const titleEl = $(`achievement-title-${i}`);
+          if (titleEl) updateCardTitle(wrap, titleEl.value);
+        });
+      });
+  }, 0);
+
+  const card = buildCollapsibleCard(item.title, item.highlight || item.subtitle, wrap);
+  addItemFooter(wrap, () => { draft.achievements.splice(i, 1); buildAchievementsList(); });
+  return card;
+}
+
+$('addAchievementBtn')?.addEventListener('click', () => {
+  if (!Array.isArray(draft.achievements)) draft.achievements = [];
+  draft.achievements.push({ title:'New Achievement', subtitle:'Course or honor', period:'', highlight:'', description:'Describe this achievement...' });
+  buildAchievementsList();
+});
+
+function buildEducationList() {
+  const container = $('educationList');
+  if (!container) return;
+  container.innerHTML = '';
+  (draft.education || []).forEach((item, i) => container.appendChild(makeEducationCard(i, item)));
+}
+
+function makeEducationCard(i, item) {
+  const wrap = document.createElement('div');
+  wrap.innerHTML = `
+    <div class="item-form-grid">
+      <div><label>Title</label><input type="text" id="education-title-${i}" value="${escH(item.title)}" /></div>
+      <div><label>Subtitle</label><input type="text" id="education-subtitle-${i}" value="${escH(item.subtitle)}" /></div>
+      <div><label>Status</label><input type="text" id="education-status-${i}" value="${escH(item.status)}" /></div>
+      <div class="full-width"><label>Description</label><textarea id="education-description-${i}" rows="3">${escH(item.description)}</textarea></div>
+    </div>`;
+
+  setTimeout(() => {
+    [['title', 'title'], ['subtitle', 'subtitle'], ['status', 'status'], ['description', 'description']]
+      .forEach(([suffix, key]) => {
+        const el = $(`education-${suffix}-${i}`);
+        if (el) el.addEventListener('input', (e) => {
+          draft.education[i][key] = e.target.value;
+          const titleEl = $(`education-title-${i}`);
+          if (titleEl) updateCardTitle(wrap, titleEl.value);
+        });
+      });
+  }, 0);
+
+  const card = buildCollapsibleCard(item.title, item.status || item.subtitle, wrap);
+  addItemFooter(wrap, () => { draft.education.splice(i, 1); buildEducationList(); });
+  return card;
+}
+
+$('addEducationBtn')?.addEventListener('click', () => {
+  if (!Array.isArray(draft.education)) draft.education = [];
+  draft.education.push({ title:'New Credential', subtitle:'Education or Certification', status:'In Progress', description:'Add details here...' });
+  buildEducationList();
+});
+
+function buildLanguagesList() {
+  const container = $('languagesList');
+  if (!container) return;
+  container.innerHTML = '';
+  (draft.languages || []).forEach((item, i) => container.appendChild(makeLanguageCard(i, item)));
+}
+
+function makeLanguageCard(i, item) {
+  const wrap = document.createElement('div');
+  wrap.innerHTML = `
+    <div class="item-form-grid">
+      <div><label>Language</label><input type="text" id="language-name-${i}" value="${escH(item.name)}" /></div>
+      <div><label>Proficiency</label><input type="text" id="language-proficiency-${i}" value="${escH(item.proficiency)}" /></div>
+    </div>`;
+
+  setTimeout(() => {
+    [['name', 'name'], ['proficiency', 'proficiency']].forEach(([suffix, key]) => {
+      const el = $(`language-${suffix}-${i}`);
+      if (el) el.addEventListener('input', (e) => {
+        draft.languages[i][key] = e.target.value;
+        const nameEl = $(`language-name-${i}`);
+        if (nameEl) updateCardTitle(wrap, nameEl.value);
       });
     });
   }, 0);
 
-  const card = buildCollapsibleCard(t.authorName, t.authorRole, wrap);
-  addItemFooter(wrap, () => { draft.testimonials.splice(i, 1); buildTestimonialsList(); });
+  const card = buildCollapsibleCard(item.name, item.proficiency, wrap);
+  addItemFooter(wrap, () => { draft.languages.splice(i, 1); buildLanguagesList(); });
   return card;
 }
 
-$('addTestimonialBtn')?.addEventListener('click', () => {
-  draft.testimonials.push({ text:'Great experience working with this developer!', authorName:'Client Name', authorRole:'CEO, Company', initials:'CN', avatarGradient:'' });
-  buildTestimonialsList();
+$('addLanguageBtn')?.addEventListener('click', () => {
+  if (!Array.isArray(draft.languages)) draft.languages = [];
+  draft.languages.push({ name:'New Language', proficiency:'Intermediate' });
+  buildLanguagesList();
 });
 
 /* ══════════════════════════════════════
@@ -667,10 +775,12 @@ function collectDraft() {
   draft.meta.brandText = val('metaBrandText') || draft.meta.brandText || 'MAS';
   draft.meta.siteTitle = val('metaSiteTitle');
   draft.meta.siteDesc  = val('metaSiteDesc');
+  draft.meta.siteKeywords = val('metaSiteKeywords');
   if (!draft.footer) draft.footer = {};
   draft.footer.tagline = val('footerTagline');
 
   // HERO
+  if (!draft.hero) draft.hero = {};
   draft.hero.availableTag  = val('heroTag');
   draft.hero.firstName     = val('heroFirstName');
   draft.hero.highlightName = val('heroHighlightName');
@@ -686,6 +796,7 @@ function collectDraft() {
   });
 
   // ABOUT
+  if (!draft.about) draft.about = {};
   draft.about.heading          = val('aboutHeading');
   draft.about.headingHighlight = val('aboutHeadingHighlight');
   draft.about.text1            = val('aboutText1');
@@ -699,11 +810,15 @@ function collectDraft() {
   // SKILLS — already live-synced via input events
 
   // CONTACT
+  if (!draft.contact) draft.contact = {};
+  if (!draft.contact.social) draft.contact.social = {};
   draft.contact.heading  = val('contactHeading');
   draft.contact.subtext  = val('contactSubtext');
   draft.contact.email    = val('contactEmail');
   draft.contact.phone    = val('contactPhone');
   draft.contact.location = val('contactLocation');
+  draft.contact.portfolioUrl = val('contactPortfolioUrl');
+  draft.contact.resumeUrl = val('contactResumeUrl');
   draft.contact.social.github    = val('socialGithub');
   draft.contact.social.linkedin  = val('socialLinkedin');
   draft.contact.social.twitter   = val('socialTwitter');

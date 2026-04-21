@@ -9,6 +9,17 @@ use Illuminate\Support\Facades\Schema;
 
 class PortfolioDataStore
 {
+    private const SKILL_CATEGORY_ORDER = [
+        'networking',
+        'webDevelopment',
+        'androidDevelopment',
+        'productivityTools',
+        'professionalStrengths',
+        'frontend',
+        'backend',
+        'tools',
+    ];
+
     public function full(): array
     {
         if ($this->hasNormalizedSchema()) {
@@ -65,6 +76,7 @@ class PortfolioDataStore
                 'brand_text' => $data['meta']['brandText'] ?? null,
                 'site_title' => $data['meta']['siteTitle'] ?? null,
                 'site_desc' => $data['meta']['siteDesc'] ?? null,
+                'site_keywords' => $data['meta']['siteKeywords'] ?? null,
             ], $timestamp);
 
             $this->upsertSingleton('portfolio_hero', [
@@ -77,24 +89,26 @@ class PortfolioDataStore
 
             $this->replaceSimpleCollection(
                 'portfolio_hero_typed_words',
-                collect($data['hero']['typedWords'] ?? [])->values()->map(
-                    fn ($word, int $index): array => [
+                collect($data['hero']['typedWords'] ?? [])
+                    ->values()
+                    ->map(fn ($word, int $index): array => [
                         'word' => (string) $word,
                         'sort_order' => $index,
-                    ]
-                )->all(),
+                    ])
+                    ->all(),
                 $timestamp
             );
 
             $this->replaceSimpleCollection(
                 'portfolio_hero_stats',
-                collect($data['hero']['stats'] ?? [])->values()->map(
-                    fn (array $stat, int $index): array => [
+                collect($data['hero']['stats'] ?? [])
+                    ->values()
+                    ->map(fn (array $stat, int $index): array => [
                         'number' => (int) ($stat['number'] ?? 0),
                         'label' => $stat['label'] ?? null,
                         'sort_order' => $index,
-                    ]
-                )->all(),
+                    ])
+                    ->all(),
                 $timestamp
             );
 
@@ -110,7 +124,7 @@ class PortfolioDataStore
                 'exp_years' => $data['about']['expYears'] ?? null,
             ], $timestamp);
 
-            $skillRows = collect(['frontend', 'backend', 'tools'])
+            $skillRows = collect($this->orderedSkillCategories(array_keys($data['skills'] ?? [])))
                 ->flatMap(fn (string $category): Collection => collect($data['skills'][$category] ?? [])
                     ->values()
                     ->map(fn (array $skill, int $index): array => [
@@ -118,7 +132,7 @@ class PortfolioDataStore
                         'name' => $skill['name'] ?? null,
                         'icon_class' => $skill['iconClass'] ?? null,
                         'icon_color' => $skill['iconColor'] ?? null,
-                        'level' => (int) ($skill['level'] ?? 0),
+                        'level' => (int) ($skill['level'] ?? 100),
                         'sort_order' => $index,
                     ]))
                 ->values()
@@ -179,17 +193,62 @@ class PortfolioDataStore
             }
 
             $this->replaceSimpleCollection(
+                'portfolio_achievements',
+                collect($data['achievements'] ?? [])
+                    ->values()
+                    ->map(fn (array $item, int $index): array => [
+                        'title' => $item['title'] ?? null,
+                        'subtitle' => $item['subtitle'] ?? null,
+                        'period' => $item['period'] ?? null,
+                        'highlight' => $item['highlight'] ?? null,
+                        'description' => $item['description'] ?? null,
+                        'sort_order' => $index,
+                    ])
+                    ->all(),
+                $timestamp
+            );
+
+            $this->replaceSimpleCollection(
+                'portfolio_education',
+                collect($data['education'] ?? [])
+                    ->values()
+                    ->map(fn (array $item, int $index): array => [
+                        'title' => $item['title'] ?? null,
+                        'subtitle' => $item['subtitle'] ?? null,
+                        'status' => $item['status'] ?? null,
+                        'description' => $item['description'] ?? null,
+                        'sort_order' => $index,
+                    ])
+                    ->all(),
+                $timestamp
+            );
+
+            $this->replaceSimpleCollection(
+                'portfolio_languages',
+                collect($data['languages'] ?? [])
+                    ->values()
+                    ->map(fn (array $item, int $index): array => [
+                        'name' => $item['name'] ?? null,
+                        'proficiency' => $item['proficiency'] ?? null,
+                        'sort_order' => $index,
+                    ])
+                    ->all(),
+                $timestamp
+            );
+
+            $this->replaceSimpleCollection(
                 'portfolio_testimonials',
-                collect($data['testimonials'] ?? [])->values()->map(
-                    fn (array $testimonial, int $index): array => [
+                collect($data['testimonials'] ?? [])
+                    ->values()
+                    ->map(fn (array $testimonial, int $index): array => [
                         'text' => $testimonial['text'] ?? null,
                         'author_name' => $testimonial['authorName'] ?? null,
                         'author_role' => $testimonial['authorRole'] ?? null,
                         'initials' => $testimonial['initials'] ?? null,
                         'avatar_gradient' => $testimonial['avatarGradient'] ?? null,
                         'sort_order' => $index,
-                    ]
-                )->all(),
+                    ])
+                    ->all(),
                 $timestamp
             );
 
@@ -199,6 +258,8 @@ class PortfolioDataStore
                 'email' => $data['contact']['email'] ?? null,
                 'phone' => $data['contact']['phone'] ?? null,
                 'location' => $data['contact']['location'] ?? null,
+                'portfolio_url' => $data['contact']['portfolioUrl'] ?? null,
+                'resume_url' => $data['contact']['resumeUrl'] ?? null,
                 'github_url' => $data['contact']['social']['github'] ?? null,
                 'linkedin_url' => $data['contact']['social']['linkedin'] ?? null,
                 'twitter_url' => $data['contact']['social']['twitter'] ?? null,
@@ -288,6 +349,7 @@ class PortfolioDataStore
                 'brandText' => $meta['brand_text'] ?? '',
                 'siteTitle' => $meta['site_title'] ?? '',
                 'siteDesc' => $meta['site_desc'] ?? '',
+                'siteKeywords' => $meta['site_keywords'] ?? '',
             ],
             'hero' => [
                 'availableTag' => $hero['available_tag'] ?? '',
@@ -321,13 +383,47 @@ class PortfolioDataStore
                 'degree' => $about['degree'] ?? '',
                 'expYears' => $about['exp_years'] ?? '',
             ],
-            'skills' => [
-                'frontend' => $this->skillsByCategory('frontend'),
-                'backend' => $this->skillsByCategory('backend'),
-                'tools' => $this->skillsByCategory('tools'),
-            ],
+            'skills' => $this->allSkillsByCategory(),
             'projects' => $projects,
             'experience' => $experience,
+            'achievements' => Schema::hasTable('portfolio_achievements')
+                ? DB::table('portfolio_achievements')
+                    ->orderBy('sort_order')
+                    ->orderBy('id')
+                    ->get()
+                    ->map(fn (object $item): array => [
+                        'title' => $item->title ?? '',
+                        'subtitle' => $item->subtitle ?? '',
+                        'period' => $item->period ?? '',
+                        'highlight' => $item->highlight ?? '',
+                        'description' => $item->description ?? '',
+                    ])
+                    ->all()
+                : [],
+            'education' => Schema::hasTable('portfolio_education')
+                ? DB::table('portfolio_education')
+                    ->orderBy('sort_order')
+                    ->orderBy('id')
+                    ->get()
+                    ->map(fn (object $item): array => [
+                        'title' => $item->title ?? '',
+                        'subtitle' => $item->subtitle ?? '',
+                        'status' => $item->status ?? '',
+                        'description' => $item->description ?? '',
+                    ])
+                    ->all()
+                : [],
+            'languages' => Schema::hasTable('portfolio_languages')
+                ? DB::table('portfolio_languages')
+                    ->orderBy('sort_order')
+                    ->orderBy('id')
+                    ->get()
+                    ->map(fn (object $item): array => [
+                        'name' => $item->name ?? '',
+                        'proficiency' => $item->proficiency ?? '',
+                    ])
+                    ->all()
+                : [],
             'testimonials' => DB::table('portfolio_testimonials')
                 ->orderBy('sort_order')
                 ->orderBy('id')
@@ -346,6 +442,8 @@ class PortfolioDataStore
                 'email' => $contact['email'] ?? '',
                 'phone' => $contact['phone'] ?? '',
                 'location' => $contact['location'] ?? '',
+                'portfolioUrl' => $contact['portfolio_url'] ?? '',
+                'resumeUrl' => $contact['resume_url'] ?? '',
                 'social' => [
                     'github' => $contact['github_url'] ?? '',
                     'linkedin' => $contact['linkedin_url'] ?? '',
@@ -394,26 +492,60 @@ class PortfolioDataStore
             || DB::table('portfolio_skills')->exists()
             || DB::table('portfolio_projects')->exists()
             || DB::table('portfolio_experiences')->exists()
-            || DB::table('portfolio_testimonials')->exists()
+            || (Schema::hasTable('portfolio_achievements') && DB::table('portfolio_achievements')->exists())
+            || (Schema::hasTable('portfolio_education') && DB::table('portfolio_education')->exists())
+            || (Schema::hasTable('portfolio_languages') && DB::table('portfolio_languages')->exists())
             || DB::table('portfolio_contact')->exists()
             || DB::table('portfolio_footer')->exists()
             || DB::table('portfolio_images')->exists();
     }
 
-    private function skillsByCategory(string $category): array
+    private function allSkillsByCategory(): array
     {
-        return DB::table('portfolio_skills')
-            ->where('category', $category)
+        $rows = DB::table('portfolio_skills')
             ->orderBy('sort_order')
             ->orderBy('id')
-            ->get()
-            ->map(fn (object $skill): array => [
-                'name' => $skill->name ?? '',
-                'iconClass' => $skill->icon_class ?? '',
-                'iconColor' => $skill->icon_color ?? '',
-                'level' => (int) $skill->level,
-            ])
-            ->all();
+            ->get();
+
+        if ($rows->isEmpty()) {
+            return [];
+        }
+
+        $grouped = [];
+        foreach ($rows as $row) {
+            $grouped[$row->category][] = [
+                'name' => $row->name ?? '',
+                'iconClass' => $row->icon_class ?? '',
+                'iconColor' => $row->icon_color ?? '',
+                'level' => (int) $row->level,
+            ];
+        }
+
+        $ordered = [];
+        foreach ($this->orderedSkillCategories(array_keys($grouped)) as $category) {
+            if (isset($grouped[$category])) {
+                $ordered[$category] = $grouped[$category];
+            }
+        }
+
+        return $ordered;
+    }
+
+    private function orderedSkillCategories(array $categories): array
+    {
+        $categories = array_values(array_unique(array_filter($categories)));
+        $ordered = [];
+
+        foreach (self::SKILL_CATEGORY_ORDER as $category) {
+            if (in_array($category, $categories, true)) {
+                $ordered[] = $category;
+            }
+        }
+
+        $extras = array_values(array_diff($categories, $ordered));
+        sort($extras);
+
+        return array_merge($ordered, $extras);
     }
 
     private function upsertSingleton(string $table, array $values, $timestamp): void

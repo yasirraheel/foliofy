@@ -978,3 +978,167 @@ body.cursor-hover .cursor-inner { width: 4px; height: 4px; }
 }
 .captcha-refresh:hover { background: rgba(124,58,237,.22); transform: rotate(180deg); }
 .captcha-error { color: #f43f5e; font-size: .82rem; margin-top: .4rem; }
+
+/* Profile refresh additions */
+.hero-actions--stacked {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+}
+
+.hero-actions--stacked .btn {
+  min-width: 170px;
+  justify-content: center;
+}
+
+.skills-panel-copy {
+  max-width: 760px;
+  margin: 0 auto 1.5rem;
+  text-align: center;
+}
+
+.skills-panel-copy h3 {
+  font-size: 1.35rem;
+  margin-bottom: 0.4rem;
+}
+
+.skills-panel-copy p {
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+.skills-grid--simple {
+  align-items: stretch;
+}
+
+.skill-card--simple {
+  min-height: 132px;
+  justify-content: center;
+  gap: 0.85rem;
+}
+
+.skill-card--simple .skill-name {
+  text-align: center;
+  line-height: 1.5;
+}
+
+.achievement-grid,
+.credential-grid,
+.language-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.4rem;
+}
+
+.achievement-card,
+.credential-card,
+.language-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(16px);
+}
+
+.achievement-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.achievement-period,
+.achievement-highlight,
+.credential-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.achievement-period,
+.credential-badge {
+  background: rgba(59, 130, 246, 0.12);
+  color: #60a5fa;
+}
+
+.achievement-highlight {
+  background: rgba(245, 158, 11, 0.14);
+  color: #fbbf24;
+}
+
+.achievement-card h3,
+.credential-card h3,
+.language-card h3 {
+  font-size: 1.15rem;
+  margin-bottom: 0.45rem;
+}
+
+.achievement-subtitle,
+.credential-status,
+.language-card p,
+.achievement-desc,
+.credential-desc {
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+.credential-status {
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.6rem;
+}
+
+.language-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.language-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  color: #38bdf8;
+  background: rgba(14, 165, 233, 0.12);
+  flex-shrink: 0;
+}
+
+.footer-link-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.btn.is-disabled,
+.contact-card-item.is-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.empty-state {
+  color: var(--text-muted);
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .hero-actions--stacked .btn {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .achievement-top {
+    align-items: flex-start;
+  }
+}

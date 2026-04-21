@@ -8,59 +8,84 @@
 const DEFAULT_DATA = {
   meta: {
     name: 'Muhammad Asif Shabbir',
-    role: 'Full-Stack Developer | Laravel & JavaScript Specialist',
+    role: 'Network Support Engineer | CCNA in Progress',
     brandText: 'MAS',
-    siteTitle: 'Muhammad Asif Shabbir | Full-Stack Developer',
-    siteDesc: 'Professional portfolio of Muhammad Asif Shabbir — Full-Stack Developer specializing in Laravel, PHP, JavaScript, React & Android development.'
+    siteTitle: 'Muhammad Asif Shabbir | Network Support Engineer',
+    siteDesc: 'Professional portfolio of Muhammad Asif Shabbir, a networking-focused IT professional with Pakistan Army leadership experience, CCNA in progress, Packet Tracer lab practice, and supporting web and Android development skills.',
+    siteKeywords: 'Muhammad Asif Shabbir, Network Support Engineer, Junior Network Engineer, NOC Engineer, IT Support, CCNA in progress, Networking, Router and Switch Configuration, Troubleshooting, VLAN, OSPF, DHCP, NAT, ACL, Packet Tracer, Technical Instructor, Military Leadership, Web Development, Android Development'
   },
   hero: {
-    availableTag: 'Available for Work',
-    firstName: "Hi, I'm",
-    highlightName: 'Asif Shabbir',
-    typedWords: ['Laravel Applications', 'React Frontends', 'Android Apps', 'REST APIs', 'Full-Stack Products', 'PHP Solutions'],
-    description: 'A passionate <strong>Full-Stack Developer</strong> with expertise in Laravel, PHP, JavaScript, and Android — building scalable, real-world products that make an impact.',
-    orbitSpeed: 12,
+    availableTag: 'Open to Networking Opportunities',
+    firstName: 'Muhammad Asif',
+    highlightName: 'Shabbir',
+    typedWords: ['Network Support', 'Router and Switch Labs', 'Packet Tracer Practice', 'Troubleshooting', 'IT Support', 'Technical Instruction'],
+    description: 'Retired Pakistan Army professional transitioning into civilian IT as a <strong>Network Support Engineer</strong>, with <strong>CCNA in preparation</strong>, practical <strong>Packet Tracer lab experience</strong>, and supporting skills in web development, Android development, and AI-assisted project building.',
+    orbitSpeed: 14,
     stats: [
-      { number: 3,  label: 'Years Exp.' },
-      { number: 51, label: 'GitHub Repos' },
-      { number: 20, label: 'Happy Clients' }
+      { number: 23, label: 'Years of Service' },
+      { number: 2, label: 'COAS Commendations' },
+      { number: 4, label: 'Target Markets' }
     ]
   },
   about: {
-    heading: 'Full-Stack Developer &',
-    headingHighlight: 'Problem Solver',
-    text1: "I'm a passionate full-stack developer with expertise in <strong>Laravel, PHP, JavaScript, and Android (Java)</strong>. I've shipped 51+ real-world projects across GitHub — from video streaming platforms and digital marketplaces to military-grade mobile apps, AI tools, and WhatsApp automation systems.",
-    text2: "I love turning complex ideas into clean, scalable, and performance-driven applications. Whether it's a Laravel SaaS backend, a Next.js storefront, an Android app with biometric security, or a Python AI tool — I bring the full picture together with attention to detail and a genuine passion for quality.",
+    heading: 'Retired Army Professional &',
+    headingHighlight: 'Networking-Focused IT Candidate',
+    text1: 'I am a retired Pakistan Army professional with service from <strong>28 Apr 2003 to 28 Apr 2026</strong>, including instructor duties, leadership exposure, operational responsibility, and structured performance-focused work. My background has built strong discipline, accountability, adaptability, and the ability to work effectively under pressure.',
+    text2: 'My primary career direction is <strong>Networking</strong>. I am currently preparing for <strong>CCNA</strong> and have strong practical hands-on lab experience in <strong>Packet Tracer</strong>, including IP addressing, VLANs, routing, DHCP, NAT, ACLs, and troubleshooting. I also bring supporting skills in web development, Android development, MS Office, and AI-assisted project building, and I am open to roles in Pakistan, UAE, KSA, and Europe.',
     name: 'Muhammad Asif Shabbir',
-    email: 'yasirraheel@github.com',
-    location: 'Pakistan',
-    degree: 'Computer Science',
-    expYears: '3+'
+    email: 'islammujahid921@gmail.com',
+    location: 'Bahawalpur, Punjab, Pakistan',
+    degree: 'BS IT - In Progress',
+    expYears: '23+'
   },
   skills: {
-    frontend: [
-      { name: 'JavaScript',      iconClass: 'fab fa-js-square',   iconColor: '#f7df1e', level: 90 },
-      { name: 'TypeScript',      iconClass: 'fas fa-code',        iconColor: '#3178c6', level: 78 },
-      { name: 'React.js',        iconClass: 'fab fa-react',       iconColor: '#61dafb', level: 82 },
-      { name: 'HTML5 / CSS3',    iconClass: 'fab fa-html5',       iconColor: '#e34f26', level: 92 },
-      { name: 'Blade (Laravel)', iconClass: 'fas fa-layer-group', iconColor: '#ff2d20', level: 93 },
-      { name: 'Bootstrap',       iconClass: 'fab fa-bootstrap',   iconColor: '#7952b3', level: 88 }
+    networking: [
+      { name: 'IP Addressing and Subnetting', iconClass: 'fas fa-network-wired', iconColor: '#0ea5e9', level: 100 },
+      { name: 'VLAN Configuration', iconClass: 'fas fa-diagram-project', iconColor: '#22c55e', level: 100 },
+      { name: 'Inter-VLAN Routing', iconClass: 'fas fa-route', iconColor: '#06b6d4', level: 100 },
+      { name: 'Static Routing', iconClass: 'fas fa-arrows-split-up-and-left', iconColor: '#2563eb', level: 100 },
+      { name: 'OSPF', iconClass: 'fas fa-circle-nodes', iconColor: '#0284c7', level: 100 },
+      { name: 'DHCP', iconClass: 'fas fa-server', iconColor: '#14b8a6', level: 100 },
+      { name: 'NAT', iconClass: 'fas fa-shield-halved', iconColor: '#0f766e', level: 100 },
+      { name: 'ACLs', iconClass: 'fas fa-list-check', iconColor: '#0f172a', level: 100 },
+      { name: 'STP', iconClass: 'fas fa-sitemap', iconColor: '#1d4ed8', level: 100 },
+      { name: 'EtherChannel', iconClass: 'fas fa-link', iconColor: '#0891b2', level: 100 },
+      { name: 'Router and Switch Security', iconClass: 'fas fa-lock', iconColor: '#334155', level: 100 },
+      { name: 'Network Troubleshooting', iconClass: 'fas fa-screwdriver-wrench', iconColor: '#ea580c', level: 100 },
+      { name: 'Packet Tracer Lab Implementation', iconClass: 'fas fa-laptop-code', iconColor: '#6366f1', level: 100 }
     ],
-    backend: [
-      { name: 'PHP',             iconClass: 'fab fa-php',         iconColor: '#8892be', level: 93 },
-      { name: 'Laravel',         iconClass: 'fas fa-fire',        iconColor: '#ff2d20', level: 95 },
-      { name: 'Node.js',         iconClass: 'fab fa-node-js',     iconColor: '#339933', level: 72 },
-      { name: 'REST APIs',       iconClass: 'fas fa-server',      iconColor: '#ff6b35', level: 90 },
-      { name: 'MySQL',           iconClass: 'fas fa-database',    iconColor: '#4479a1', level: 85 },
-      { name: 'Java (Android)',  iconClass: 'fab fa-android',     iconColor: '#3ddc84', level: 75 }
+    webDevelopment: [
+      { name: 'HTML', iconClass: 'fab fa-html5', iconColor: '#e34f26', level: 100 },
+      { name: 'CSS', iconClass: 'fab fa-css3-alt', iconColor: '#1572b6', level: 100 },
+      { name: 'JavaScript', iconClass: 'fab fa-js-square', iconColor: '#f7df1e', level: 100 },
+      { name: 'Bootstrap', iconClass: 'fab fa-bootstrap', iconColor: '#7952b3', level: 100 },
+      { name: 'PHP', iconClass: 'fab fa-php', iconColor: '#8892be', level: 100 },
+      { name: 'Laravel', iconClass: 'fab fa-laravel', iconColor: '#ff2d20', level: 100 },
+      { name: 'WordPress', iconClass: 'fab fa-wordpress', iconColor: '#21759b', level: 100 }
     ],
-    tools: [
-      { name: 'Git / GitHub',    iconClass: 'fab fa-git-alt',     iconColor: '#f05032', level: 90 },
-      { name: 'Linux / CLI',     iconClass: 'fab fa-linux',       iconColor: '#fcc624', level: 80 },
-      { name: 'Android Studio',  iconClass: 'fas fa-mobile-alt',  iconColor: '#3ddc84', level: 75 },
-      { name: 'Figma / UI Design',iconClass: 'fab fa-figma',      iconColor: '#f24e1e', level: 70 },
-      { name: 'Composer / NPM',  iconClass: 'fas fa-cube',        iconColor: '#cb3837', level: 88 },
-      { name: 'GoStock / APIs',  iconClass: 'fas fa-chart-line',  iconColor: '#43e97b', level: 80 }
+    androidDevelopment: [
+      { name: 'Java', iconClass: 'fab fa-java', iconColor: '#f89820', level: 100 },
+      { name: 'Android Studio', iconClass: 'fab fa-android', iconColor: '#3ddc84', level: 100 },
+      { name: 'Firebase', iconClass: 'fas fa-fire', iconColor: '#f59e0b', level: 100 }
+    ],
+    productivityTools: [
+      { name: 'MS Word', iconClass: 'fas fa-file-word', iconColor: '#2563eb', level: 100 },
+      { name: 'MS Excel', iconClass: 'fas fa-file-excel', iconColor: '#16a34a', level: 100 },
+      { name: 'MS PowerPoint', iconClass: 'fas fa-file-powerpoint', iconColor: '#ea580c', level: 100 },
+      { name: 'AI-Assisted Development', iconClass: 'fas fa-robot', iconColor: '#8b5cf6', level: 100 },
+      { name: 'Vibe Coding', iconClass: 'fas fa-code', iconColor: '#7c3aed', level: 100 },
+      { name: 'Building Projects Using AI Tools', iconClass: 'fas fa-wand-magic-sparkles', iconColor: '#db2777', level: 100 },
+      { name: 'General Technical Problem Solving', iconClass: 'fas fa-puzzle-piece', iconColor: '#ca8a04', level: 100 }
+    ],
+    professionalStrengths: [
+      { name: 'Leadership', iconClass: 'fas fa-user-shield', iconColor: '#0f172a', level: 100 },
+      { name: 'Training and Instruction', iconClass: 'fas fa-chalkboard-user', iconColor: '#0891b2', level: 100 },
+      { name: 'Discipline', iconClass: 'fas fa-medal', iconColor: '#dc2626', level: 100 },
+      { name: 'Team Coordination', iconClass: 'fas fa-users', iconColor: '#2563eb', level: 100 },
+      { name: 'Operations Support', iconClass: 'fas fa-compass-drafting', iconColor: '#475569', level: 100 },
+      { name: 'Structured Execution', iconClass: 'fas fa-list-ol', iconColor: '#1d4ed8', level: 100 },
+      { name: 'Attention to Detail', iconClass: 'fas fa-magnifying-glass', iconColor: '#0f766e', level: 100 },
+      { name: 'Adaptability', iconClass: 'fas fa-arrows-rotate', iconColor: '#7c2d12', level: 100 }
     ]
   },
   projects: [
@@ -773,84 +798,118 @@ const DEFAULT_DATA = {
 ],
   experience: [
     {
-      title: 'Full-Stack Developer',
-      company: 'Team Hifsa',
-      period: '2025 – Present',
-      location: 'Pakistan (Remote)',
-      desc: 'Building and maintaining full-stack web applications using PHP, Laravel, Blade, and JavaScript. Delivered a skill-assessment platform, CCNA tracker, and multiple client-facing tools.',
-      tags: ['PHP', 'Laravel', 'JavaScript', 'MySQL'],
-      iconClass: 'fas fa-briefcase'
-    },
-    {
-      title: 'Laravel & PHP Developer',
-      company: 'CineWorm / Freelance',
-      period: '2024 – 2025',
-      location: 'Remote',
-      desc: 'Developed and deployed the CineWorm TV web platform and Android app. Built GoStock-integrated stock tracker, multi-vendor marketplace, XSender, OmniReach, and streaming infrastructure tools.',
-      tags: ['Laravel', 'Blade', 'JavaScript', 'Android', 'Java'],
-      iconClass: 'fas fa-code'
-    },
-    {
-      title: 'Junior Web Developer',
-      company: 'Freelance Projects',
-      period: '2022 – 2024',
+      title: 'Havildar (Sergeant)',
+      company: 'Pakistan Army',
+      period: '28 Apr 2003 - 28 Apr 2026',
       location: 'Pakistan',
-      desc: 'Kick-started career building 10+ client websites and tools. Specialised in PHP backends and Blade-templated frontends. Developed marketplaces, CMS systems, and outreach tools.',
-      tags: ['PHP', 'HTML/CSS', 'JavaScript', 'MySQL'],
-      iconClass: 'fas fa-laptop-code'
+      desc: 'Completed more than two decades of disciplined military service with responsibilities spanning training environments, operations support, leadership, team coordination, and structured execution. Built a strong record of responsibility, consistency, and performance under pressure.',
+      tags: ['Leadership', 'Discipline', 'Operations Support', 'Team Coordination'],
+      iconClass: 'fas fa-shield'
     },
     {
-      title: 'Computer Science Degree',
-      company: 'University',
-      period: '2019 – 2023',
-      location: 'Pakistan',
-      desc: 'Studied Computer Science with a focus on software engineering, databases, networking, and mobile development. Built foundational expertise in algorithms, data structures, and system design.',
-      tags: ['Algorithms', 'Data Structures', 'Networking', 'Software Eng.'],
-      iconClass: 'fas fa-graduation-cap'
+      title: 'Weapons Training Instructor',
+      company: 'Pakistan Army / SI&T Quetta',
+      period: 'During military service',
+      location: 'Quetta, Pakistan',
+      desc: 'Served in instructor-focused roles with responsibility for structured training delivery, performance standards, evaluation, and disciplined knowledge transfer. This background directly supports technical instruction, support roles, and process-driven work in civilian IT.',
+      tags: ['Training and Instruction', 'Performance Standards', 'Responsibility', 'Attention to Detail'],
+      iconClass: 'fas fa-chalkboard-user'
+    },
+    {
+      title: 'Networking Track - CCNA Under Preparation',
+      company: 'Packet Tracer Lab Practice',
+      period: 'Current focus',
+      location: 'Bahawalpur, Punjab, Pakistan',
+      desc: 'Actively preparing for CCNA with hands-on Packet Tracer lab work covering IP addressing, subnetting, VLANs, inter-VLAN routing, static routing, OSPF, DHCP, NAT, ACLs, STP, EtherChannel, basic device security, and troubleshooting.',
+      tags: ['CCNA in Progress', 'Packet Tracer', 'Routing', 'Troubleshooting'],
+      iconClass: 'fas fa-network-wired'
     }
   ],
-  testimonials: [
+  achievements: [
     {
-      text: 'Asif delivered our Laravel platform on time with excellent code quality. His understanding of the full stack meant we needed minimal back-and-forth. Highly recommended!',
-      authorName: 'Hifsa Team Lead',
-      authorRole: 'Director, Team Hifsa',
-      initials: 'HT',
-      avatarGradient: 'linear-gradient(135deg,#667eea,#764ba2)'
+      title: 'JNC Quetta',
+      subtitle: 'AX2',
+      period: '2018',
+      highlight: '2nd Position',
+      description: 'Completed the course with second position and received recognition for performance.'
     },
     {
-      text: 'The CineWorm web platform Asif built exceeded all expectations. It handled real user load from day one and looked incredible. Phenomenal full-stack work.',
-      authorName: 'CineWorm Client',
-      authorRole: 'Founder, CineWorm',
-      initials: 'CW',
-      avatarGradient: 'linear-gradient(135deg,#f093fb,#f5576c)'
+      title: 'JLC at JLA Shinkiari Academy',
+      subtitle: 'AX2',
+      period: '2019',
+      highlight: '3rd Position',
+      description: 'Ranked third and earned position-based recognition during course completion.'
     },
     {
-      text: 'Working with Asif on our marketplace was a great experience. He understood business requirements quickly and delivered a robust, scalable PHP/Laravel solution.',
-      authorName: 'MarketBob Owner',
-      authorRole: 'CEO, MarketBob',
-      initials: 'MB',
-      avatarGradient: 'linear-gradient(135deg,#4facfe,#00f2fe)'
+      title: 'Sniper Course',
+      subtitle: 'Qualified',
+      period: '2009',
+      highlight: 'Qualified',
+      description: 'Successfully completed the course and met qualification standards.'
     },
     {
-      text: "Asif's Android + Laravel combination is rare and powerful. He built our stock tracker app end-to-end and it's been running live on stock.cineworm.org with zero downtime since launch.",
-      authorName: 'Haqi Ali',
-      authorRole: 'Client, StockTracker Project',
-      initials: 'HA',
-      avatarGradient: 'linear-gradient(135deg,#43e97b,#38f9d7)'
+      title: 'Unarmed Combat Course',
+      subtitle: 'Military Training',
+      period: '2010',
+      highlight: 'Completed',
+      description: 'Completed formal close-combat training as part of military professional development.'
+    },
+    {
+      title: 'Desert Warfare Course at ADWS Chor Sindh',
+      subtitle: 'AX2 Grade',
+      period: '2012',
+      highlight: '2nd Position',
+      description: 'Completed the course with second position and earned formal recognition for performance.'
+    },
+    {
+      title: 'Position Certificates in Multiple Courses',
+      subtitle: 'Professional Military Training',
+      period: '',
+      highlight: 'Repeated Recognition',
+      description: 'Received position certificates across multiple courses in recognition of consistent course performance.'
+    },
+    {
+      title: 'COAS Commendation Cards',
+      subtitle: 'Recognition for Course Performance and Outstanding Service',
+      period: '',
+      highlight: 'Awarded by Two Army Chiefs',
+      description: 'Received COAS Commendation Cards from General Qamar Javed Bajwa and Field Marshal Asim Munir in recognition of professional excellence and service quality.'
     }
   ],
+  education: [
+    {
+      title: 'BS IT',
+      subtitle: 'Education',
+      status: 'In Progress',
+      description: 'Formal information technology studies currently in progress.'
+    },
+    {
+      title: 'CCNA',
+      subtitle: 'Certification Track',
+      status: 'In Preparation',
+      description: 'Currently preparing for CCNA with practical Packet Tracer labs and networking fundamentals.'
+    }
+  ],
+  languages: [
+    { name: 'Urdu', proficiency: 'Native / Strong' },
+    { name: 'English', proficiency: 'Intermediate' },
+    { name: 'Arabic', proficiency: 'Basic' }
+  ],
+  testimonials: [],
   contact: {
-    heading: "Let's build something great together",
-    subtext: "I'm currently available for freelance work and open to new opportunities. Whether it's a Laravel app, a React frontend, or a full SaaS product — let's talk!",
-    email: 'yasirraheel@github.com',
-    phone: '+92 000 000 0000',
-    location: 'Pakistan',
+    heading: "Let's connect for networking and IT support opportunities",
+    subtext: 'I am open to networking, NOC, IT support, and technical infrastructure opportunities in Pakistan, UAE, KSA, and Europe. I am also available for selected web, Android, and AI-assisted project work where relevant.',
+    email: 'islammujahid921@gmail.com',
+    phone: '03006859611',
+    location: 'Bahawalpur, Punjab, Pakistan',
+    portfolioUrl: 'https://foliofy.me/',
+    resumeUrl: '',
     social: {
-      github:    'https://github.com/yasirraheel',
-      linkedin:  '#',
-      twitter:   '#',
-      dribbble:  '#',
-      instagram: '#'
+      github: '',
+      linkedin: 'https://www.linkedin.com/in/asif-shabbiir/',
+      twitter: '',
+      dribbble: '',
+      instagram: ''
     },
     whatsappApi: {
       enabled:      false,
@@ -860,7 +919,7 @@ const DEFAULT_DATA = {
     }
   },
   footer: {
-    tagline: 'Building full-stack products — from Laravel to Android, one commit at a time.'
+    tagline: 'Networking-focused IT professional with disciplined military leadership, technical instruction experience, and practical lab-based learning.'
   },
   images: {
     hero:  'profile.png',
