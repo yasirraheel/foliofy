@@ -819,9 +819,9 @@ const DEFAULT_DATA = {
     {
       title: 'Instructor Assignment - Kingdom of Saudi Arabia Army',
       company: 'Pakistan Army / KSA Army Training Support',
-      period: 'During military service',
+      period: '2021 - 2024',
       location: 'Kingdom of Saudi Arabia',
-      desc: 'Served as an instructor for the Kingdom of Saudi Arabia Army in Weapons and Low Intensity Conflict Training. This role reflects international instruction exposure, structured supervision, team coordination, adaptability, and the ability to transfer technical knowledge in disciplined operational settings.',
+      desc: 'Completed a three-year instructor assignment from 2021 to 2024 for the Kingdom of Saudi Arabia Army in Weapons and Low Intensity Conflict Training. This role reflects international instruction exposure, structured supervision, team coordination, adaptability, and the ability to transfer technical knowledge in disciplined operational settings.',
       tags: ['International Instruction', 'Low Intensity Conflict Training', 'Team Coordination', 'Adaptability'],
       iconClass: 'fas fa-globe'
     },

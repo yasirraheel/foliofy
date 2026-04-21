@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-  <link rel="stylesheet" href="style.css?v=11" />
+  <link rel="stylesheet" href="style.css?v=12" />
 </head>
 <body>
   <div class="cursor-outer" id="cursorOuter"></div>
@@ -116,7 +116,11 @@
         <div class="hero-actions hero-actions--stacked" data-aos="fade-up" data-aos-delay="600">
           <a href="#contact" class="btn btn-outline" id="heroResumeBtn">
             <i class="fas fa-file-lines"></i>
-            <span>View Resume</span>
+            <span>View CV</span>
+          </a>
+          <a href="#contact" class="btn btn-outline" id="heroDownloadCvBtn">
+            <i class="fas fa-download"></i>
+            <span>Download CV</span>
           </a>
           <a href="#contact" class="btn btn-primary" id="heroContactBtn">
             <span>Contact Me</span>
@@ -152,6 +156,21 @@
 
       <div class="hero-visual" data-aos="fade-left" data-aos-delay="400">
         <div class="profile-ring-outer">
+          <div class="orbit-skill-popup" id="orbitSkillPopup" aria-hidden="true">
+            <div class="orbit-skill-popup__icon" id="orbitSkillPopupIcon">
+              <i class="fas fa-code"></i>
+            </div>
+            <div class="orbit-skill-popup__content">
+              <span class="orbit-skill-popup__eyebrow">Portfolio Skill</span>
+              <div class="orbit-skill-popup__headline">
+                <h3 id="orbitSkillPopupTitle">Skill</h3>
+                <span class="orbit-skill-popup__level" id="orbitSkillPopupLevel">100%</span>
+              </div>
+              <div class="orbit-skill-popup__meter">
+                <span id="orbitSkillPopupMeter"></span>
+              </div>
+            </div>
+          </div>
           <div class="profile-ring-inner">
             <div class="profile-image-wrap">
               <img src="profile.png" alt="Muhammad Asif Shabbir" class="profile-img" />
@@ -248,7 +267,7 @@
 
           <div class="about-actions">
             <a href="#contact" class="btn btn-primary">Contact Me</a>
-            <a href="#contact" class="btn btn-outline" id="aboutResumeLink">View Resume <i class="fas fa-file-lines"></i></a>
+            <a href="#contact" class="btn btn-outline" id="aboutResumeLink">View CV <i class="fas fa-file-lines"></i></a>
           </div>
         </div>
       </div>
@@ -387,7 +406,14 @@
             <a href="#contact" class="contact-card-item" id="contactResume">
               <div class="contact-card-icon"><i class="fas fa-file-lines"></i></div>
               <div>
-                <span class="contact-card-label">Resume</span>
+                <span class="contact-card-label">View CV</span>
+                <span class="contact-card-value">Need user input</span>
+              </div>
+            </a>
+            <a href="#contact" class="contact-card-item" id="contactResumeDownload">
+              <div class="contact-card-icon"><i class="fas fa-download"></i></div>
+              <div>
+                <span class="contact-card-label">Download CV</span>
                 <span class="contact-card-value">Need user input</span>
               </div>
             </a>
@@ -504,11 +530,12 @@
 
         <div class="footer-newsletter">
           <h4 class="footer-col-title">Direct Links</h4>
-          <p>Use the portfolio, LinkedIn, or resume links to continue the conversation.</p>
+          <p>Use the portfolio, LinkedIn, or CV links to continue the conversation.</p>
           <div class="footer-link-stack">
             <a href="https://foliofy.me/" class="btn btn-outline btn-full" id="footerPortfolioLink" target="_blank" rel="noopener noreferrer">Open Portfolio</a>
             <a href="https://www.linkedin.com/in/asif-shabbiir/" class="btn btn-outline btn-full" id="footerLinkedinLink" target="_blank" rel="noopener noreferrer">LinkedIn Profile</a>
-            <a href="#contact" class="btn btn-outline btn-full" id="footerResumeLink">View Resume</a>
+            <a href="#contact" class="btn btn-outline btn-full" id="footerResumeLink">View CV</a>
+            <a href="#contact" class="btn btn-outline btn-full" id="footerDownloadCvLink">Download CV</a>
           </div>
         </div>
       </div>
@@ -526,8 +553,8 @@
 
   <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-  <script src="data.js?v=11"></script>
-  <script src="renderer.js?v=11"></script>
-  <script src="script.js?v=11"></script>
+  <script src="data.js?v=12"></script>
+  <script src="renderer.js?v=12"></script>
+  <script src="script.js?v=12"></script>
 </body>
 </html>

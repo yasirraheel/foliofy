@@ -162,7 +162,8 @@ const PortfolioRenderer = {
       heroImg.src = images.hero;
     }
 
-    this.configureLinkButton(document.getElementById('heroResumeBtn'), contact?.resumeUrl, 'View Resume', true);
+    this.configureLinkButton(document.getElementById('heroResumeBtn'), contact?.resumeUrl, 'View CV', true);
+    this.configureDownloadLink(document.getElementById('heroDownloadCvBtn'), contact?.resumeUrl, 'Download CV');
     this.configureLinkButton(document.getElementById('heroContactBtn'), '#contact', 'Contact Me');
     this.configureLinkButton(document.getElementById('heroLinkedinBtn'), contact?.social?.linkedin, 'LinkedIn', true);
     this.configureLinkButton(document.getElementById('heroProjectsBtn'), '#projects', 'View Projects');
@@ -173,23 +174,30 @@ const PortfolioRenderer = {
 
   renderOrbitBadges() {
     const allSkills = this.flattenSkills();
-    if (!allSkills.length) {
-      return;
-    }
-
     const duration = this.data.hero?.orbitSpeed || 14;
     const ring = document.querySelector('.profile-ring-outer');
     if (ring) {
       ring.style.setProperty('--orbit-duration', `${duration}s`);
-      ring.querySelectorAll('.tech-badge').forEach((badge) => badge.remove());
+      const orbitContainer = document.getElementById('orbitBadgesContainer') || ring;
+      orbitContainer.innerHTML = '';
+
       allSkills.forEach((skill, index) => {
         const delay = -((index / allSkills.length) * duration).toFixed(3);
         const badge = document.createElement('div');
+        const skillColor = skill.iconColor || '#7c3aed';
+        const skillLevel = Math.max(0, Math.min(100, Number(skill.level ?? 100) || 100));
         badge.className = 'tech-badge';
-        badge.style.cssText = `color:${skill.iconColor || '#7c3aed'}; animation-duration:${duration}s; animation-delay:${delay}s;`;
+        badge.style.cssText = `color:${skillColor}; animation-duration:${duration}s; animation-delay:${delay}s; --badge-color:${skillColor};`;
         badge.title = skill.name || '';
+        badge.dataset.name = skill.name || '';
+        badge.dataset.level = String(skillLevel);
+        badge.dataset.iconClass = skill.iconClass || 'fas fa-code';
+        badge.dataset.color = skillColor;
+        badge.setAttribute('tabindex', '0');
+        badge.setAttribute('role', 'button');
+        badge.setAttribute('aria-label', `${skill.name || 'Skill'} skill level ${skillLevel}%`);
         badge.innerHTML = `<i class="${this.escapeHtml(skill.iconClass || 'fas fa-code')}"></i>`;
-        ring.appendChild(badge);
+        orbitContainer.appendChild(badge);
       });
     }
 
@@ -208,6 +216,8 @@ const PortfolioRenderer = {
         loaderRing.appendChild(badge);
       });
     }
+
+    window.dispatchEvent(new CustomEvent('portfolio:orbit-badges-updated'));
   },
 
   renderAbout() {
@@ -282,7 +292,7 @@ const PortfolioRenderer = {
         `};`;
     }
 
-    this.configureLinkButton(document.getElementById('aboutResumeLink'), contact?.resumeUrl, 'View Resume', true);
+    this.configureLinkButton(document.getElementById('aboutResumeLink'), contact?.resumeUrl, 'View CV', true);
   },
 
   renderSkills() {
@@ -514,7 +524,8 @@ const PortfolioRenderer = {
     }
 
     this.configureContactCard(document.getElementById('contactPortfolio'), contact.portfolioUrl, this.displayUrl(contact.portfolioUrl) || 'Portfolio', !!contact.portfolioUrl, true);
-    this.configureContactCard(document.getElementById('contactResume'), contact.resumeUrl || '#contact', contact.resumeUrl ? 'Open resume link' : 'Need user input', !!contact.resumeUrl, true);
+    this.configureContactCard(document.getElementById('contactResume'), contact.resumeUrl || '#contact', contact.resumeUrl ? 'View PDF CV' : 'Need user input', !!contact.resumeUrl, true);
+    this.configureDownloadCard(document.getElementById('contactResumeDownload'), contact.resumeUrl || '#contact', contact.resumeUrl ? 'Download PDF CV' : 'Need user input', !!contact.resumeUrl);
 
     this.configureSocialLink('socialGithub', contact.social?.github);
     this.configureSocialLink('socialLinkedin', contact.social?.linkedin);
@@ -549,7 +560,8 @@ const PortfolioRenderer = {
 
     this.configureLinkButton(document.getElementById('footerPortfolioLink'), contact.portfolioUrl, 'Open Portfolio', true);
     this.configureLinkButton(document.getElementById('footerLinkedinLink'), contact.social?.linkedin, 'LinkedIn Profile', true);
-    this.configureLinkButton(document.getElementById('footerResumeLink'), contact.resumeUrl, 'View Resume', true);
+    this.configureLinkButton(document.getElementById('footerResumeLink'), contact.resumeUrl, 'View CV', true);
+    this.configureDownloadLink(document.getElementById('footerDownloadCvLink'), contact.resumeUrl, 'Download CV');
   },
 
   configureLinkButton(element, url, label, openInNewTab = false) {
@@ -585,10 +597,33 @@ const PortfolioRenderer = {
     element.removeAttribute('rel');
 
     if (textNode) {
-      textNode.textContent = label === 'View Resume' ? 'Resume Link Needed' : label;
-    } else if (label === 'View Resume') {
-      element.textContent = 'Resume Link Needed';
+      textNode.textContent = label === 'View CV' ? 'CV Link Needed' : label;
+    } else if (label === 'View CV') {
+      element.textContent = 'CV Link Needed';
     }
+  },
+
+  configureDownloadLink(element, url, label) {
+    this.configureLinkButton(element, url, label, false);
+    this.setDownloadState(element, url);
+  },
+
+  configureDownloadCard(element, href, value, enabled) {
+    this.configureContactCard(element, href, value, enabled, false);
+    this.setDownloadState(element, enabled ? href : '');
+  },
+
+  setDownloadState(element, url) {
+    if (!element) {
+      return;
+    }
+
+    if (url && !String(url).startsWith('#')) {
+      element.setAttribute('download', this.downloadFileName(url));
+      return;
+    }
+
+    element.removeAttribute('download');
   },
 
   configureContactCard(element, href, value, enabled, openInNewTab = false) {
@@ -645,6 +680,23 @@ const PortfolioRenderer = {
 
   flattenSkills() {
     return Object.values(this.data.skills || {}).flatMap((items) => Array.isArray(items) ? items : []);
+  },
+
+  downloadFileName(url) {
+    if (!url) {
+      return 'Muhammad-Asif-Shabbir-CV.pdf';
+    }
+
+    try {
+      const filename = decodeURIComponent(String(url).split('?')[0].split('/').pop() || '');
+      if (filename.toLowerCase().endsWith('.pdf')) {
+        return filename;
+      }
+    } catch (_) {
+      // Fall back to the default file name below.
+    }
+
+    return 'Muhammad-Asif-Shabbir-CV.pdf';
   },
 
   displayUrl(url) {

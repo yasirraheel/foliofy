@@ -76,9 +76,10 @@ class PortfolioApplicationTest extends TestCase
             ->assertSee('"name":"Muhammad Asif Shabbir"', false)
             ->assertSee('"email":"islammujahid921@gmail.com"', false)
             ->assertSee('"portfolioUrl":"https://foliofy.me/"', false)
-            ->assertSee('data.js?v=11', false)
-            ->assertSee('renderer.js?v=11', false)
-            ->assertSee('script.js?v=11', false);
+            ->assertSee('"period":"2021 - 2024"', false)
+            ->assertSee('data.js?v=12', false)
+            ->assertSee('renderer.js?v=12', false)
+            ->assertSee('script.js?v=12', false);
 
         $this->assertStringContainsString('no-store', (string) $response->headers->get('Cache-Control'));
         $this->assertStringContainsString('no-cache', (string) $response->headers->get('Cache-Control'));
@@ -219,6 +220,10 @@ class PortfolioApplicationTest extends TestCase
             'email' => 'islammujahid921@gmail.com',
             'portfolio_url' => 'https://foliofy.me/',
         ]);
+        $this->assertDatabaseHas('portfolio_experiences', [
+            'title' => 'Instructor Assignment - Kingdom of Saudi Arabia Army',
+            'period' => '2021 - 2024',
+        ]);
         $this->assertGreaterThan(0, DB::table('portfolio_skills')->count());
         $this->assertGreaterThan(0, DB::table('portfolio_projects')->count());
         $this->assertGreaterThan(0, DB::table('portfolio_experiences')->count());
@@ -313,5 +318,30 @@ class PortfolioApplicationTest extends TestCase
         $this->assertStringStartsWith('uploads/', $uploadedUrl);
         $this->assertTrue(File::exists($this->uploadsPath.'/'.basename($uploadedUrl)));
         $this->assertTrue(File::exists($this->profileImagePath));
+    }
+
+    public function test_upload_endpoint_allows_admin_cv_pdf_uploads(): void
+    {
+        $admin = User::factory()->create([
+            'is_admin' => true,
+            'password' => 'secret123',
+        ]);
+
+        $response = $this->actingAs($admin)->post('/upload.php', [
+            'file' => UploadedFile::fake()->create('resume.pdf', 256, 'application/pdf'),
+            'assetKey' => 'resume',
+        ]);
+
+        $response->assertOk()
+            ->assertJson([
+                'success' => true,
+            ]);
+
+        $uploadedUrl = $response->json('url');
+
+        $this->assertNotNull($uploadedUrl);
+        $this->assertStringStartsWith('uploads/cv_', $uploadedUrl);
+        $this->assertStringEndsWith('.pdf', $uploadedUrl);
+        $this->assertTrue(File::exists($this->uploadsPath.'/'.basename($uploadedUrl)));
     }
 }

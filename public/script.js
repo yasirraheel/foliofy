@@ -63,10 +63,17 @@
   };
   animateCursor();
 
-  document.querySelectorAll('a, button, .project-card, .skill-card').forEach(el => {
-    el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
-    el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
-  });
+  const bindHoverTargets = () => {
+    document.querySelectorAll('a, button, .project-card, .skill-card, .tech-badge').forEach(el => {
+      if (el.dataset.cursorBound) return;
+      el.dataset.cursorBound = 'true';
+      el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+      el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+    });
+  };
+
+  bindHoverTargets();
+  window.addEventListener('portfolio:orbit-badges-updated', bindHoverTargets);
 })();
 
 /* ─── 4. NAVBAR SCROLL BEHAVIOUR ─── */
@@ -305,6 +312,122 @@
   function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 })();
 
+function initOrbitSkillPopup() {
+  const ring = document.querySelector('.profile-ring-outer');
+  const popup = document.getElementById('orbitSkillPopup');
+  const iconWrap = document.getElementById('orbitSkillPopupIcon');
+  const titleNode = document.getElementById('orbitSkillPopupTitle');
+  const levelNode = document.getElementById('orbitSkillPopupLevel');
+  const meterNode = document.getElementById('orbitSkillPopupMeter');
+
+  if (!ring || !popup || !iconWrap || !titleNode || !levelNode || !meterNode) return;
+
+  const iconNode = iconWrap.querySelector('i');
+  let activeBadge = null;
+  let hideTimer = null;
+
+  const cancelHide = () => {
+    if (hideTimer) {
+      window.clearTimeout(hideTimer);
+      hideTimer = null;
+    }
+  };
+
+  const hidePopup = () => {
+    cancelHide();
+    if (activeBadge) {
+      activeBadge.classList.remove('is-active');
+      activeBadge = null;
+    }
+    popup.classList.remove('is-visible');
+    popup.setAttribute('aria-hidden', 'true');
+  };
+
+  const scheduleHide = () => {
+    cancelHide();
+    hideTimer = window.setTimeout(hidePopup, 110);
+  };
+
+  const positionPopup = (badge) => {
+    if (!badge || !document.body.contains(badge)) return;
+
+    const ringRect = ring.getBoundingClientRect();
+    const badgeRect = badge.getBoundingClientRect();
+    const popupRect = popup.getBoundingClientRect();
+    const ringCenterX = ringRect.left + ringRect.width / 2;
+    const ringCenterY = ringRect.top + ringRect.height / 2;
+    const badgeCenterX = badgeRect.left + badgeRect.width / 2;
+    const badgeCenterY = badgeRect.top + badgeRect.height / 2;
+    const vectorX = badgeCenterX - ringCenterX;
+    const vectorY = badgeCenterY - ringCenterY;
+    const distance = Math.hypot(vectorX, vectorY) || 1;
+    const padding = window.innerWidth <= 768 ? 8 : 12;
+    const outwardOffset = window.innerWidth <= 768 ? 12 : 20;
+
+    let left = badgeCenterX - ringRect.left + (vectorX / distance) * outwardOffset - popupRect.width / 2;
+    let top = badgeCenterY - ringRect.top + (vectorY / distance) * outwardOffset - popupRect.height / 2;
+
+    left = Math.max(padding, Math.min(left, ringRect.width - popupRect.width - padding));
+    top = Math.max(padding, Math.min(top, ringRect.height - popupRect.height - padding));
+
+    popup.style.left = left + 'px';
+    popup.style.top = top + 'px';
+  };
+
+  const showPopup = (badge) => {
+    cancelHide();
+
+    if (activeBadge && activeBadge !== badge) {
+      activeBadge.classList.remove('is-active');
+    }
+
+    activeBadge = badge;
+    badge.classList.add('is-active');
+
+    const skillName = badge.dataset.name || 'Skill';
+    const skillLevel = Math.max(0, Math.min(100, parseInt(badge.dataset.level || '100', 10) || 100));
+    const skillColor = badge.dataset.color || '#7c3aed';
+    const iconClass = badge.dataset.iconClass || 'fas fa-code';
+
+    titleNode.textContent = skillName;
+    levelNode.textContent = skillLevel + '%';
+    popup.style.setProperty('--skill-color', skillColor);
+    popup.style.setProperty('--skill-level', skillLevel + '%');
+    meterNode.style.width = skillLevel + '%';
+    if (iconNode) iconNode.className = iconClass;
+
+    positionPopup(badge);
+    popup.classList.add('is-visible');
+    popup.setAttribute('aria-hidden', 'false');
+  };
+
+  const bindBadges = () => {
+    const badges = ring.querySelectorAll('.tech-badge');
+    if (!badges.length) {
+      hidePopup();
+      return;
+    }
+
+    badges.forEach((badge) => {
+      if (badge.dataset.popupBound) return;
+      badge.dataset.popupBound = 'true';
+      badge.addEventListener('mouseenter', () => showPopup(badge));
+      badge.addEventListener('focus', () => showPopup(badge));
+      badge.addEventListener('mousemove', () => positionPopup(badge));
+      badge.addEventListener('mouseleave', scheduleHide);
+      badge.addEventListener('blur', scheduleHide);
+      badge.addEventListener('click', () => showPopup(badge));
+    });
+  };
+
+  bindBadges();
+  ring.addEventListener('mouseleave', scheduleHide);
+  window.addEventListener('resize', () => {
+    if (activeBadge) positionPopup(activeBadge);
+  });
+  window.addEventListener('portfolio:orbit-badges-updated', bindBadges);
+}
+
 /* ─── 10. PROJECT FILTER (uses dynamic cards rendered by CMS) ─── */
 function initProjectFilter() {
   const btns  = document.querySelectorAll('.filter-btn');
@@ -540,6 +663,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initProjectFilter();
   initSwiper();
   initTilt();
+  initOrbitSkillPopup();
 });
 
 /* ─── 16. SMOOTH SECTION SCROLL FOR ALL NAV LINKS ─── */

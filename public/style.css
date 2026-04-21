@@ -386,14 +386,30 @@ body.cursor-hover .cursor-inner { width: 4px; height: 4px; }
   background: var(--bg-card);
 }
 .profile-img { width: 100%; height: 100%; object-fit: cover; }
+#orbitBadgesContainer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
 .tech-badge {
-  position: absolute; width: 48px; height: 48px; border-radius: 50%;
-  background: var(--bg-card); border: 1px solid var(--border);
+  position: absolute; width: 50px; height: 50px; border-radius: 50%;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02)),
+    var(--bg-card);
+  border: 1px solid rgba(124, 58, 237, 0.18);
   display: flex; align-items: center; justify-content: center;
-  font-size: 1.3rem; box-shadow: var(--shadow-md);
+  font-size: 1.3rem;
+  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.16), inset 0 1px 0 rgba(255,255,255,0.08);
+  backdrop-filter: blur(16px);
   animation: orbit var(--orbit-duration, 12s) linear infinite;
   transform-origin: calc(50% + 170px) 50%;
   cursor: pointer;
+  pointer-events: auto;
+  z-index: 5;
+  transition: border-color 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
+}
+.tech-badge i {
+  transition: transform 0.24s ease, filter 0.24s ease;
 }
 @keyframes orbit {
   from { transform: rotate(0deg) translateX(190px) rotate(0deg); }
@@ -405,26 +421,133 @@ body.cursor-hover .cursor-inner { width: 4px; height: 4px; }
   animation-play-state: paused;
 }
 
-/* Skill name tooltip (appears above on badge hover) */
 .tech-badge::after {
-  content: attr(data-name);
-  position: absolute; bottom: calc(100% + 8px); left: 50%;
-  transform: translateX(-50%) translateY(6px);
-  background: var(--bg-card); border: 1px solid var(--border);
-  color: var(--text-primary);
-  font-family: 'Outfit', sans-serif; font-size: 0.68rem; font-weight: 700;
-  padding: 5px 10px; border-radius: 8px; white-space: nowrap;
-  opacity: 0; pointer-events: none;
-  transition: opacity 0.22s ease, transform 0.22s ease;
-  box-shadow: var(--shadow-md); z-index: 20;
+  display: none;
 }
-.tech-badge:hover::after {
-  opacity: 1; transform: translateX(-50%) translateY(0);
-}
-.tech-badge:hover {
-  border-color: var(--primary);
-  box-shadow: 0 0 16px hsla(250,84%,65%,0.4);
+.tech-badge:hover,
+.tech-badge:focus-visible,
+.tech-badge.is-active {
+  border-color: var(--badge-color, var(--primary));
+  box-shadow:
+    0 0 0 4px rgba(124, 58, 237, 0.14),
+    0 20px 48px rgba(15, 23, 42, 0.22);
   z-index: 10;
+}
+.tech-badge:hover i,
+.tech-badge:focus-visible i,
+.tech-badge.is-active i {
+  transform: scale(1.12);
+  filter: drop-shadow(0 0 10px rgba(124, 58, 237, 0.3));
+}
+.tech-badge:focus-visible {
+  outline: none;
+}
+
+.orbit-skill-popup {
+  --skill-color: var(--primary);
+  --skill-level: 100%;
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  width: min(240px, calc(100% - 36px));
+  padding: 16px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(255,255,255,0.12), transparent 36%),
+    linear-gradient(160deg, rgba(8, 15, 28, 0.92), rgba(15, 23, 42, 0.84));
+  border: 1px solid rgba(255,255,255,0.09);
+  box-shadow: 0 28px 60px rgba(2, 6, 23, 0.32), inset 0 1px 0 rgba(255,255,255,0.05);
+  backdrop-filter: blur(18px);
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(0, 16px, 0) scale(0.92);
+  transition: opacity 0.24s ease, transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  z-index: 20;
+}
+.orbit-skill-popup.is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+[data-theme="light"] .orbit-skill-popup {
+  background:
+    radial-gradient(circle at top right, rgba(255,255,255,0.9), transparent 34%),
+    linear-gradient(160deg, rgba(255,255,255,0.94), rgba(241,245,249,0.92));
+  border-color: rgba(148,163,184,0.22);
+  box-shadow: 0 24px 52px rgba(15, 23, 42, 0.16), inset 0 1px 0 rgba(255,255,255,0.7);
+}
+.orbit-skill-popup__icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--skill-color), #38bdf8);
+  color: #fff;
+  font-size: 1.45rem;
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.18);
+}
+.orbit-skill-popup__content {
+  margin-top: 14px;
+}
+.orbit-skill-popup__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.orbit-skill-popup__headline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 10px;
+}
+.orbit-skill-popup__headline h3 {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.35;
+  color: #f8fafc;
+}
+[data-theme="light"] .orbit-skill-popup__headline h3 {
+  color: #0f172a;
+}
+.orbit-skill-popup__level {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 62px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+[data-theme="light"] .orbit-skill-popup__level {
+  color: #0f172a;
+}
+.orbit-skill-popup__meter {
+  margin-top: 14px;
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(148,163,184,0.18);
+}
+.orbit-skill-popup__meter span {
+  display: block;
+  width: var(--skill-level);
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--skill-color), #38bdf8);
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.24);
+  transition: width 0.28s ease;
 }
 
 /* Mobile orbit — reduced radius to fit 260px ring within narrow viewports */
@@ -896,6 +1019,21 @@ body.cursor-hover .cursor-inner { width: 4px; height: 4px; }
     animation-name: orbit-mobile;
     transform-origin: calc(50% + 93px) 50%;
   }
+  .orbit-skill-popup {
+    width: min(210px, calc(100% - 24px));
+    padding: 14px;
+  }
+  .orbit-skill-popup__icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 16px;
+    font-size: 1.2rem;
+  }
+  .orbit-skill-popup__headline {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
 
   /* Scale loader ring on mobile */
   .loader-ring-outer { width: 160px; height: 160px; }
@@ -941,6 +1079,11 @@ body.cursor-hover .cursor-inner { width: 4px; height: 4px; }
     width: 28px; height: 28px; font-size: 0.75rem;
     animation-name: orbit-xs;
     transform-origin: calc(50% + 74px) 50%;
+  }
+  .orbit-skill-popup {
+    width: min(190px, calc(100% - 18px));
+    padding: 12px;
+    border-radius: 20px;
   }
 }
 

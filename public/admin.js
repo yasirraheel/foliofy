@@ -263,6 +263,7 @@ function populateForms() {
   setValue('contactLocation', d.contact?.location);
   setValue('contactPortfolioUrl', d.contact?.portfolioUrl);
   setValue('contactResumeUrl', d.contact?.resumeUrl);
+  refreshResumeUploadUi(d.contact?.resumeUrl || '');
   setValue('socialGithub',    d.contact?.social?.github);
   setValue('socialLinkedin',  d.contact?.social?.linkedin);
   setValue('socialTwitter',   d.contact?.social?.twitter);
@@ -989,6 +990,7 @@ function initSettings() {
 function initImageUploads() {
   setupImageUpload('heroImageInput',  'heroImgPreviewEl',  'heroUploadStatus',  'hero');
   setupImageUpload('aboutImageInput', 'aboutImgPreviewEl', 'aboutUploadStatus', 'about');
+  initResumeUpload();
 
   // "Use Hero Photo" button copies the hero image into the about slot
   const syncBtn = $('aboutSyncBtn');
@@ -1030,6 +1032,170 @@ function setupImageUpload(inputId, previewId, statusId, imageKey) {
     if (file) processImageFile(file, preview, statusId, imageKey);
     input.value = '';
   });
+}
+
+function currentResumeUrl() {
+  const inputValue = $('contactResumeUrl')?.value?.trim();
+  if (inputValue) return inputValue;
+  return draft.contact?.resumeUrl || '';
+}
+
+function resumeDisplayName(url) {
+  if (!url) return 'No CV uploaded yet.';
+
+  try {
+    const filename = decodeURIComponent(String(url).split('?')[0].split('/').pop() || '');
+    if (!filename || filename.startsWith('cv_')) {
+      return 'Uploaded CV PDF';
+    }
+    return filename;
+  } catch (_) {
+    return 'Uploaded CV PDF';
+  }
+}
+
+function resumeDownloadName(url) {
+  const filename = resumeDisplayName(url);
+  return filename.toLowerCase().endsWith('.pdf')
+    ? filename
+    : 'Muhammad-Asif-Shabbir-CV.pdf';
+}
+
+function setDocumentLinkState(linkId, url, { download = false } = {}) {
+  const link = $(linkId);
+  if (!link) return;
+
+  if (url) {
+    link.href = url;
+    link.classList.remove('is-disabled');
+    link.removeAttribute('aria-disabled');
+    if (download) {
+      link.setAttribute('download', resumeDownloadName(url));
+      link.removeAttribute('target');
+      link.removeAttribute('rel');
+    } else {
+      link.removeAttribute('download');
+      link.setAttribute('target', '_blank');
+      link.setAttribute('rel', 'noopener noreferrer');
+    }
+    return;
+  }
+
+  link.href = '#';
+  link.classList.add('is-disabled');
+  link.setAttribute('aria-disabled', 'true');
+  link.removeAttribute('download');
+  link.removeAttribute('target');
+  link.removeAttribute('rel');
+}
+
+function refreshResumeUploadUi(url = currentResumeUrl()) {
+  const fileChip = $('resumeFileName');
+  if (fileChip) {
+    fileChip.textContent = resumeDisplayName(url);
+    fileChip.classList.toggle('is-placeholder', !url);
+  }
+
+  setDocumentLinkState('resumeViewLink', url);
+  setDocumentLinkState('resumeDownloadLink', url, { download: true });
+}
+
+function initResumeUpload() {
+  const input = $('resumeFileInput');
+  const zone = $('resumeUploadZone');
+  const urlInput = $('contactResumeUrl');
+
+  if (!input || !zone) return;
+
+  refreshResumeUploadUi();
+
+  if (urlInput && !urlInput.dataset.resumeSyncBound) {
+    urlInput.dataset.resumeSyncBound = 'true';
+    urlInput.addEventListener('input', () => {
+      if (!draft.contact) draft.contact = {};
+      draft.contact.resumeUrl = urlInput.value.trim();
+      refreshResumeUploadUi();
+    });
+  }
+
+  if (!zone.dataset.resumeDnDBound) {
+    zone.dataset.resumeDnDBound = 'true';
+    zone.addEventListener('dragover', e => {
+      e.preventDefault();
+      zone.classList.add('drag-over');
+    });
+    zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault();
+      zone.classList.remove('drag-over');
+      const file = e.dataTransfer?.files?.[0];
+      if (file) processResumeFile(file, 'resumeUploadStatus');
+    });
+  }
+
+  if (!input.dataset.resumeChangeBound) {
+    input.dataset.resumeChangeBound = 'true';
+    input.addEventListener('change', e => {
+      const file = e.target.files?.[0];
+      if (file) processResumeFile(file, 'resumeUploadStatus');
+      input.value = '';
+    });
+  }
+}
+
+async function processResumeFile(file, statusId) {
+  const looksLikePdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+  if (!looksLikePdf) {
+    setUploadStatus(statusId, 'Invalid type. Please upload a PDF CV.', 'err');
+    return;
+  }
+  if (file.size > 8 * 1024 * 1024) {
+    setUploadStatus(statusId, 'File too large. Max 8 MB.', 'err');
+    return;
+  }
+
+  setUploadStatus(statusId, 'Uploading CV...', 'info');
+  const uploaded = await tryResumeUpload(file, statusId);
+  if (!uploaded) {
+    setUploadStatus(statusId, 'Upload failed. Please make sure you are logged in and the server is running.', 'err');
+  }
+}
+
+async function tryResumeUpload(file, statusId) {
+  try {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('assetKey', 'resume');
+
+    const old = currentResumeUrl();
+    if (old.startsWith('uploads/')) fd.append('replaces', old.replace('uploads/', ''));
+
+    const headers = csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {};
+    const res = await fetch('upload.php', { method: 'POST', body: fd, headers });
+    const ct = res.headers.get('content-type') || '';
+
+    if (res.status === 401) {
+      setUploadStatus(statusId, 'Your session expired. Please log in again.', 'err');
+      return false;
+    }
+
+    if (!res.ok || !ct.includes('json')) return false;
+
+    const json = await res.json();
+    if (json.success && json.url) {
+      if (!draft.contact) draft.contact = {};
+      draft.contact.resumeUrl = json.url;
+      setValue('contactResumeUrl', json.url);
+      refreshResumeUploadUi(json.url);
+      setUploadStatus(statusId, 'CV uploaded to server. Click Save Changes to persist.', 'ok');
+      return true;
+    }
+
+    setUploadStatus(statusId, 'Server: ' + (json.error || 'unknown error'), 'err');
+    return false;
+  } catch (_) {
+    return false;
+  }
 }
 
 async function processImageFile(file, preview, statusId, imageKey) {

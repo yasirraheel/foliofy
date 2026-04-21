@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <link rel="stylesheet" href="admin.css" />
+  <link rel="stylesheet" href="admin.css?v=12" />
 </head>
 <body>
 
@@ -400,8 +400,30 @@
             <input type="url" id="contactPortfolioUrl" placeholder="https://foliofy.me/" />
           </div>
           <div class="form-group">
-            <label><i class="fas fa-file-lines"></i> Resume URL</label>
+            <label><i class="fas fa-file-lines"></i> CV URL</label>
             <input type="url" id="contactResumeUrl" placeholder="Add when available" />
+          </div>
+        </div>
+
+        <div class="section-divider"><span>CV Upload</span></div>
+        <div class="image-upload-zone document-upload-zone" id="resumeUploadZone">
+          <div class="doc-upload-preview" aria-hidden="true">
+            <i class="fas fa-file-pdf"></i>
+          </div>
+          <div class="img-upload-controls">
+            <label class="btn-upload-img" for="resumeFileInput">
+              <i class="fas fa-cloud-upload-alt"></i> Upload CV PDF
+            </label>
+            <input type="file" id="resumeFileInput" accept="application/pdf" />
+            <p class="img-upload-hint"><i class="fas fa-info-circle"></i> PDF only · Max 8 MB · Upload updates the CV URL field automatically</p>
+            <div class="doc-upload-meta">
+              <span class="doc-upload-file is-placeholder" id="resumeFileName">No CV uploaded yet.</span>
+              <div class="doc-upload-links">
+                <a href="#" class="doc-upload-link is-disabled" id="resumeViewLink" target="_blank" rel="noopener noreferrer" aria-disabled="true">View Current CV</a>
+                <a href="#" class="doc-upload-link is-disabled" id="resumeDownloadLink" aria-disabled="true">Download Current CV</a>
+              </div>
+            </div>
+            <p class="img-upload-status" id="resumeUploadStatus"></p>
           </div>
         </div>
 
@@ -534,7 +556,7 @@
   </div>
 </div>
 
-<script src="data.js?v=11"></script>
-<script src="admin.js?v=11"></script>
+<script src="data.js?v=12"></script>
+<script src="admin.js?v=12"></script>
 </body>
 </html>

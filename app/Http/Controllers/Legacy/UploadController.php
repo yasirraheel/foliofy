@@ -31,18 +31,22 @@ class UploadController extends Controller
             return response()->json(['error' => 'Unauthenticated.'], 401, self::CORS_HEADERS);
         }
 
-        if (! $request->hasFile('image')) {
-            $errorCode = $_FILES['image']['error'] ?? -1;
+        $field = $request->hasFile('image')
+            ? 'image'
+            : ($request->hasFile('file') ? 'file' : null);
+
+        if ($field === null) {
+            $errorCode = $_FILES['image']['error'] ?? ($_FILES['file']['error'] ?? -1);
 
             return response()->json([
                 'error' => 'No file uploaded or upload error: '.$errorCode,
             ], 400, self::CORS_HEADERS);
         }
 
-        $file = $request->file('image');
+        $file = $request->file($field);
 
         if ($file === null || ! $file->isValid()) {
-            $errorCode = $file?->getError() ?? ($_FILES['image']['error'] ?? -1);
+            $errorCode = $file?->getError() ?? ($_FILES[$field]['error'] ?? -1);
 
             return response()->json([
                 'error' => 'No file uploaded or upload error: '.$errorCode,
@@ -54,13 +58,14 @@ class UploadController extends Controller
             'image/png' => 'png',
             'image/gif' => 'gif',
             'image/webp' => 'webp',
+            'application/pdf' => 'pdf',
         ];
 
         $mimeType = (string) $file->getMimeType();
 
         if (! array_key_exists($mimeType, $allowed)) {
             return response()->json([
-                'error' => 'Invalid file type. Only JPG, PNG, GIF, WEBP allowed.',
+                'error' => 'Invalid file type. Only JPG, PNG, GIF, WEBP, and PDF allowed.',
             ], 400, self::CORS_HEADERS);
         }
 
@@ -73,19 +78,24 @@ class UploadController extends Controller
         $uploadDir = (string) config('portfolio.uploads_path');
         File::ensureDirectoryExists($uploadDir);
 
-        $filename = 'img_'.bin2hex(random_bytes(8)).'.'.$allowed[$mimeType];
+        $isImage = str_starts_with($mimeType, 'image/');
+        $filenamePrefix = $isImage ? 'img_' : 'cv_';
+        $filename = $filenamePrefix.bin2hex(random_bytes(8)).'.'.$allowed[$mimeType];
         $file->move($uploadDir, $filename);
 
         $destPath = $uploadDir.DIRECTORY_SEPARATOR.$filename;
         $destUrl = 'uploads/'.$filename;
 
-        $imageKey = (string) $request->input('imageKey', '');
-        if ($imageKey === 'hero' || $imageKey === '' || $imageKey === 'about') {
+        $assetKey = (string) $request->input('assetKey', $request->input('imageKey', ''));
+        if (
+            $isImage &&
+            ($assetKey === 'hero' || $assetKey === '' || $assetKey === 'about')
+        ) {
             File::copy($destPath, (string) config('portfolio.profile_image_path'));
         }
 
         $replaces = basename((string) $request->input('replaces', ''));
-        if ($replaces !== '' && str_starts_with($replaces, 'img_')) {
+        if ($replaces !== '' && ($isImage ? str_starts_with($replaces, 'img_') : str_starts_with($replaces, 'cv_'))) {
             $oldPath = $uploadDir.DIRECTORY_SEPARATOR.$replaces;
             if (File::exists($oldPath)) {
                 File::delete($oldPath);
