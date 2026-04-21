@@ -1,17 +1,33 @@
-Options -Indexes
+DirectoryIndex index.php
 
-# Remove .html extension from URLs
-RewriteEngine On
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
 
-# Redirect /index to /
-RewriteRule ^index$ / [R=301,L]
+    RewriteEngine On
 
-# Remove .html extension: /page -> /page.html (internally)
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME}.html -f
-RewriteRule ^([^/]+)/?$ $1.html [L]
+    # Preserve auth and CSRF headers when the project root is the document root.
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
-# Redirect existing .html requests to extension-less URL
-RewriteCond %{THE_REQUEST} /([^.]+)\.html [NC]
-RewriteRule ^ /%1 [R=301,NC,L]
+    RewriteCond %{HTTP:x-xsrf-token} .
+    RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
+
+    # If /public is exposed directly, let Apache handle it normally.
+    RewriteRule ^public/ - [L]
+
+    # Serve browser assets from /public even when the live server points at the repo root.
+    RewriteRule ^(admin\.css|admin\.js|data\.js|renderer\.js|script\.js|style\.css|profile\.png|preview_about\.png|preview_hero\.png|preview_projects\.png|preview_skills\.png|favicon\.ico|robots\.txt)$ public/$1 [L]
+
+    # Force the old root-level entry files through Laravel instead of the stale static copies.
+    RewriteRule ^(index\.html|admin\.html|api_messages\.php|upload\.php|wa_proxy\.php)$ index.php [L]
+
+    # Redirect trailing slashes on routed URLs.
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+
+    # Route everything else through Laravel.
+    RewriteRule ^ index.php [L]
+</IfModule>

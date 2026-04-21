@@ -56,6 +56,16 @@ Then open:
 - `http://127.0.0.1:8000/`
 - `http://127.0.0.1:8000/admin.html`
 
+## Live Server Note
+
+For Apache/shared hosting, the preferred document root is still `public/`.
+
+This repository now also includes a root `index.php` and root `.htaccess` bridge so the app still routes into Laravel if the live server is pointed at the project root by mistake. That bridge forwards:
+
+- `index.html` and `admin.html` into Laravel routes
+- browser assets like `data.js`, `renderer.js`, `script.js`, `admin.js`, `style.css`, and images into `public/`
+- legacy endpoints like `api_messages.php`, `upload.php`, and `wa_proxy.php` into Laravel
+
 ## Testing
 
 ```bash
@@ -64,7 +74,7 @@ php artisan test
 
 ## Notes
 
-- Portfolio content editing still behaves the same way as before: the admin dashboard stores portfolio data in browser localStorage, while message inbox and image uploads are server-backed.
+- Portfolio content is MySQL-backed through Laravel. The public page reads Laravel-injected data, and the admin dashboard saves portfolio changes back into the database.
 - Uploaded images are stored under `public/uploads/`.
-- Contact messages are stored in Laravel storage through the configured messages path.
-- The original root-level static source files were kept during migration as reference material while the Laravel version was wired in.
+- Contact messages are stored in MySQL.
+- The old root-level static files remain in the repository only as legacy artifacts, but the root bridge now routes browser requests into Laravel/public so those stale copies do not drive the live site.

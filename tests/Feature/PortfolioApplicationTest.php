@@ -83,6 +83,22 @@ class PortfolioApplicationTest extends TestCase
         $this->assertStringContainsString('no-cache', (string) $response->headers->get('Cache-Control'));
     }
 
+    public function test_project_root_bridges_live_server_requests_into_laravel(): void
+    {
+        $this->assertFileExists(base_path('index.php'));
+        $this->assertSame(
+            "<?php\n\ndeclare(strict_types=1);\n\nrequire __DIR__.'/public/index.php';\n",
+            File::get(base_path('index.php'))
+        );
+
+        $rootHtaccess = File::get(base_path('.htaccess'));
+
+        $this->assertStringContainsString('DirectoryIndex index.php', $rootHtaccess);
+        $this->assertStringContainsString('public/$1', $rootHtaccess);
+        $this->assertStringContainsString('index.php [L]', $rootHtaccess);
+        $this->assertStringContainsString('index\\.html|admin\\.html', $rootHtaccess);
+    }
+
     public function test_admin_login_bootstrap_and_password_update_use_session_auth(): void
     {
         $admin = User::factory()->create([
