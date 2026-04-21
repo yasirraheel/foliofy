@@ -7,6 +7,63 @@
 const IS_MOBILE_VIEW = window.matchMedia('(max-width: 768px)').matches;
 const PREFERS_REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const SHOULD_MINIMIZE_MOTION = IS_MOBILE_VIEW || PREFERS_REDUCED_MOTION;
+let activeElasticScrollFrame = null;
+
+function stopElasticScroll() {
+  if (activeElasticScrollFrame !== null) {
+    cancelAnimationFrame(activeElasticScrollFrame);
+    activeElasticScrollFrame = null;
+  }
+}
+
+function easeOutElastic(progress) {
+  if (progress === 0) return 0;
+  if (progress === 1) return 1;
+  const c4 = (2 * Math.PI) / 3;
+  return Math.pow(2, -10 * progress) * Math.sin((progress * 10 - 0.75) * c4) + 1;
+}
+
+function getMaxScrollY() {
+  return Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+}
+
+function animateElasticScrollTo(targetY, duration = 900) {
+  const destination = Math.min(Math.max(targetY, 0), getMaxScrollY());
+
+  if (PREFERS_REDUCED_MOTION) {
+    window.scrollTo(0, destination);
+    return;
+  }
+
+  const startY = window.scrollY;
+  const distance = destination - startY;
+
+  if (Math.abs(distance) < 2) {
+    window.scrollTo(0, destination);
+    return;
+  }
+
+  stopElasticScroll();
+  const startTime = performance.now();
+
+  const step = (now) => {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = easeOutElastic(progress);
+    const nextY = Math.min(Math.max(startY + distance * eased, 0), getMaxScrollY());
+    window.scrollTo(0, nextY);
+
+    if (progress < 1) {
+      activeElasticScrollFrame = requestAnimationFrame(step);
+      return;
+    }
+
+    window.scrollTo(0, destination);
+    activeElasticScrollFrame = null;
+  };
+
+  activeElasticScrollFrame = requestAnimationFrame(step);
+}
 
 /* ─── 0. RENDERER INIT (must run first) ─── */
 (function initRenderer() {
@@ -701,7 +758,10 @@ function initSwiper() {
   window.addEventListener('scroll', () => {
     btn.classList.toggle('visible', window.scrollY > 400);
   }, { passive: true });
-  btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: SHOULD_MINIMIZE_MOTION ? 'auto' : 'smooth' }));
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    animateElasticScrollTo(0, 960);
+  });
 })();
 
 /* ─── 14. FOOTER YEAR ─── */
@@ -727,10 +787,21 @@ document.addEventListener('DOMContentLoaded', () => {
 /* ─── 16. SMOOTH SECTION SCROLL FOR ALL NAV LINKS ─── */
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
   anchor.addEventListener('click', (e) => {
-    const target = document.querySelector(anchor.getAttribute('href'));
+    const targetSelector = anchor.getAttribute('href');
+
+    if (!targetSelector || targetSelector === '#') {
+      e.preventDefault();
+      animateElasticScrollTo(0, 900);
+      return;
+    }
+
+    const target = document.querySelector(targetSelector);
     if (target) {
       e.preventDefault();
-      target.scrollIntoView({ behavior: SHOULD_MINIMIZE_MOTION ? 'auto' : 'smooth', block: 'start' });
+      const navbar = document.getElementById('navbar');
+      const offset = navbar ? navbar.offsetHeight + 10 : 80;
+      const targetY = target.getBoundingClientRect().top + window.scrollY - offset;
+      animateElasticScrollTo(targetY, 900);
     }
   });
 });
