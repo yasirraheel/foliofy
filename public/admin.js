@@ -229,7 +229,9 @@ function populateForms() {
     if (orbitVal) orbitVal.textContent = d.hero.orbitSpeed + 's';
   }
   buildTagChips('heroTypedTagList', 'heroTypedInput', 'heroTypedAddBtn', d.hero?.typedWords || [], (newList) => { draft.hero.typedWords = newList; });
-  buildStatsEditor(d.hero?.stats || []);
+  if (!draft.hero) draft.hero = {};
+  if (!Array.isArray(draft.hero.stats)) draft.hero.stats = Array.isArray(d.hero?.stats) ? d.hero.stats : [];
+  buildStatsEditor(draft.hero.stats);
 
   /* ABOUT */
   setValue('aboutHeading',          d.about?.heading);
@@ -300,15 +302,58 @@ function setValue(id, val) {
 /* ── STATS EDITOR ── */
 function buildStatsEditor(stats) {
   const container = $('heroStatsContainer');
+  if (!container) return;
+
+  const statList = Array.isArray(stats) ? stats : [];
+  if (!statList.length) {
+    statList.push({ number: 0, label: 'New Stat' });
+  }
+
+  if (!draft.hero) draft.hero = {};
+  draft.hero.stats = statList;
+
   container.innerHTML = '';
-  stats.forEach((stat, i) => {
+  statList.forEach((stat, i) => {
     const card = document.createElement('div');
     card.className = 'stat-edit-card';
     card.innerHTML = `
-      <div><label>Stat ${i+1} Number</label><input type="number" id="statNum${i}" value="${stat.number}" /></div>
-      <div><label>Stat ${i+1} Label</label><input type="text" id="statLbl${i}" value="${stat.label}" /></div>`;
+      <div><label>Stat ${i+1} Number</label><input type="number" id="statNum${i}" value="${escH(stat.number ?? 0)}" /></div>
+      <div><label>Stat ${i+1} Label</label><input type="text" id="statLbl${i}" value="${escH(stat.label ?? '')}" /></div>
+      <div class="item-footer">
+        <button type="button" class="btn-remove-item stat-remove-btn" data-stat-index="${i}">
+          <i class="fas fa-trash"></i> Remove Stat
+        </button>
+      </div>`;
+
+    const removeBtn = card.querySelector('.stat-remove-btn');
+    removeBtn?.addEventListener('click', () => {
+      if (statList.length <= 1) {
+        toast('At least one stat is required.', 'warning');
+        return;
+      }
+
+      statList.splice(i, 1);
+      draft.hero.stats = statList;
+      buildStatsEditor(statList);
+    });
+
     container.appendChild(card);
   });
+
+  const addWrap = document.createElement('div');
+  addWrap.className = 'add-item-bar stats-add-item-bar';
+  addWrap.innerHTML = `
+    <button type="button" class="btn-add-item" id="addHeroStatBtn">
+      <i class="fas fa-plus-circle"></i> Add Stat
+    </button>`;
+
+  addWrap.querySelector('#addHeroStatBtn')?.addEventListener('click', () => {
+    statList.push({ number: 0, label: 'New Stat' });
+    draft.hero.stats = statList;
+    buildStatsEditor(statList);
+  });
+
+  container.appendChild(addWrap);
 }
 
 /* ── TAG CHIPS ── */

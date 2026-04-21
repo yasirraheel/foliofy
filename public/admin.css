@@ -439,6 +439,10 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   transition: all var(--tr);
 }
 .stat-edit-card input:focus { border-color: var(--primary); }
+.stats-add-item-bar {
+  grid-column: 1 / -1;
+  padding: 4px 0 0;
+}
 
 /* ─── SKILLS ─── */
 .tabs-row {
