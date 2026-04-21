@@ -354,22 +354,51 @@ function initOrbitSkillPopup() {
     const ringRect = ring.getBoundingClientRect();
     const badgeRect = badge.getBoundingClientRect();
     const popupRect = popup.getBoundingClientRect();
-    const ringCenterX = ringRect.left + ringRect.width / 2;
-    const ringCenterY = ringRect.top + ringRect.height / 2;
     const badgeCenterX = badgeRect.left + badgeRect.width / 2;
     const badgeCenterY = badgeRect.top + badgeRect.height / 2;
-    const vectorX = badgeCenterX - ringCenterX;
-    const vectorY = badgeCenterY - ringCenterY;
-    const distance = Math.hypot(vectorX, vectorY) || 1;
-    const padding = window.innerWidth <= 768 ? 8 : 12;
-    const outwardOffset = window.innerWidth <= 768 ? 12 : 20;
+    const isMobile = window.innerWidth <= 768;
+    const gap = isMobile ? 14 : 24;
+    const padding = isMobile ? 10 : 16;
+    const spaceLeft = ringRect.left;
+    const spaceRight = window.innerWidth - ringRect.right;
 
-    let left = badgeCenterX - ringRect.left + (vectorX / distance) * outwardOffset - popupRect.width / 2;
-    let top = badgeCenterY - ringRect.top + (vectorY / distance) * outwardOffset - popupRect.height / 2;
+    let side = 'right';
+    let left;
+    let top;
 
-    left = Math.max(padding, Math.min(left, ringRect.width - popupRect.width - padding));
-    top = Math.max(padding, Math.min(top, ringRect.height - popupRect.height - padding));
+    if (isMobile) {
+      side = 'bottom';
+      left = (ringRect.width - popupRect.width) / 2;
+      top = ringRect.height + gap;
+    } else {
+      const canUseRight = spaceRight >= popupRect.width + gap;
+      const canUseLeft = spaceLeft >= popupRect.width + gap;
 
+      if (canUseRight) {
+        side = 'right';
+      } else if (canUseLeft) {
+        side = 'left';
+      } else {
+        side = spaceRight >= spaceLeft ? 'right' : 'left';
+      }
+
+      left = side === 'right'
+        ? ringRect.width + gap
+        : -popupRect.width - gap;
+
+      top = badgeCenterY - ringRect.top - popupRect.height / 2;
+
+      const viewportTop = ringRect.top + top;
+      const viewportBottom = viewportTop + popupRect.height;
+      if (viewportTop < padding) {
+        top += padding - viewportTop;
+      }
+      if (viewportBottom > window.innerHeight - padding) {
+        top -= viewportBottom - (window.innerHeight - padding);
+      }
+    }
+
+    popup.dataset.side = side;
     popup.style.left = left + 'px';
     popup.style.top = top + 'px';
   };
