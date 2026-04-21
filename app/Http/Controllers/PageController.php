@@ -61,6 +61,8 @@ class PageController extends Controller
             );
         }
 
+        $html = $this->applyAssetVersioning($html);
+
         $script = sprintf(
             '<meta name="csrf-token" content="%s">%s<script>window.__PORTFOLIO_DATA__=%s;window.__ADMIN_CONTEXT__=%s;window.__CSRF_TOKEN__=%s;</script>%s</head>',
             e($csrfToken),
@@ -78,6 +80,35 @@ class PageController extends Controller
             'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
             'Pragma' => 'no-cache',
         ]);
+    }
+
+    private function applyAssetVersioning(string $html): string
+    {
+        foreach (['style.css', 'admin.css', 'data.js', 'renderer.js', 'script.js', 'admin.js'] as $asset) {
+            $assetVersion = $this->assetVersion($asset);
+            $pattern = sprintf('/%s\\?v=[^"\']*/', preg_quote($asset, '/'));
+            $replacement = sprintf('%s?v=%s', $asset, $assetVersion);
+            $html = preg_replace($pattern, $replacement, $html) ?? $html;
+        }
+
+        return $html;
+    }
+
+    private function assetVersion(string $asset): string
+    {
+        $path = public_path($asset);
+
+        if (! File::exists($path)) {
+            return '1';
+        }
+
+        $hash = sha1_file($path);
+
+        if ($hash === false) {
+            return (string) File::lastModified($path);
+        }
+
+        return substr($hash, 0, 10);
     }
 
     private function adminUser(): ?User

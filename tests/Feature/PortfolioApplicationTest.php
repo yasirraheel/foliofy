@@ -79,9 +79,10 @@ class PortfolioApplicationTest extends TestCase
             ->assertSee('"themeDefault":"dark"', false)
             ->assertSee('"period":"2021 - 2024"', false)
             ->assertSee('<html lang="en" data-theme="dark">', false)
-            ->assertSee('data.js?v=13', false)
-            ->assertSee('renderer.js?v=13', false)
-            ->assertSee('script.js?v=13', false);
+            ->assertSee('style.css?v=', false)
+            ->assertSee('data.js?v=', false)
+            ->assertSee('renderer.js?v=', false)
+            ->assertSee('script.js?v=', false);
 
         $this->assertStringContainsString('no-store', (string) $response->headers->get('Cache-Control'));
         $this->assertStringContainsString('no-cache', (string) $response->headers->get('Cache-Control'));
