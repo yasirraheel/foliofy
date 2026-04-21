@@ -198,7 +198,7 @@
             <label>Orbit Circulation Speed <span class="hint">Lower = faster · Higher = slower</span></label>
             <div class="orbit-speed-row">
               <span class="orbit-speed-label-text"><i class="fas fa-bolt"></i> Fast</span>
-              <input type="range" id="heroOrbitSpeed" min="3" max="30" step="1" value="12" />
+              <input type="range" id="heroOrbitSpeed" min="3" max="120" step="1" value="12" />
               <span class="orbit-speed-label-text"><i class="fas fa-feather"></i> Slow</span>
               <span class="orbit-speed-value" id="heroOrbitSpeedVal">12s</span>
             </div>

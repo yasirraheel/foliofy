@@ -68,6 +68,7 @@ body {
   color: var(--text-primary);
   line-height: 1.6;
   overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
   width: 100%;
   transition: background-color var(--transition), color var(--transition);
 }
@@ -1021,10 +1022,31 @@ body.cursor-hover .cursor-inner { width: 4px; height: 4px; }
 }
 
 @media (max-width: 768px) {
+  html { scroll-behavior: auto; }
   .nav-links, .btn-sm { display: none; }
   .hamburger { display: flex; }
   .hero-stats { flex-direction: column; align-items: center; gap: 20px; }
   .stat-divider { width: 60px; height: 1px; }
+
+  /* Keep mobile scrolling and paint performance smooth */
+  .hero-canvas { display: none; }
+  .profile-ring-outer,
+  .profile-ring-outer::before,
+  .profile-ring-outer::after,
+  .scroll-indicator,
+  .loader-ring-outer,
+  .loader-ring-outer::before,
+  .loader-ring-outer::after,
+  .loader-orbit-badge,
+  .status-dot.pulse {
+    animation: none !important;
+  }
+  [data-aos] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .scroll-indicator { display: none; }
 
   /* Let the hero visual consume available mobile width without crowding the image */
   .hero-visual {

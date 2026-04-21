@@ -4,6 +4,10 @@
 
 'use strict';
 
+const IS_MOBILE_VIEW = window.matchMedia('(max-width: 768px)').matches;
+const PREFERS_REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const SHOULD_MINIMIZE_MOTION = IS_MOBILE_VIEW || PREFERS_REDUCED_MOTION;
+
 /* ─── 0. RENDERER INIT (must run first) ─── */
 (function initRenderer() {
   if (typeof PortfolioRenderer !== 'undefined' && typeof PortfolioData !== 'undefined') {
@@ -138,6 +142,10 @@
 (function initHeroCanvas() {
   const canvas = document.getElementById('heroCanvas');
   if (!canvas) return;
+  if (SHOULD_MINIMIZE_MOTION) {
+    canvas.style.display = 'none';
+    return;
+  }
   const ctx = canvas.getContext('2d');
   let W, H, particles = [], animFrame;
   const PARTICLE_COUNT = 80;
@@ -247,6 +255,14 @@
 (function initCounters() {
   const counters = document.querySelectorAll('.stat-number');
   let triggered  = false;
+
+  if (SHOULD_MINIMIZE_MOTION) {
+    counters.forEach(counter => {
+      const target = +counter.getAttribute('data-target');
+      if (Number.isFinite(target)) counter.textContent = target;
+    });
+    return;
+  }
 
   const animateCounters = () => {
     counters.forEach(counter => {
@@ -685,7 +701,7 @@ function initSwiper() {
   window.addEventListener('scroll', () => {
     btn.classList.toggle('visible', window.scrollY > 400);
   }, { passive: true });
-  btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: SHOULD_MINIMIZE_MOTION ? 'auto' : 'smooth' }));
 })();
 
 /* ─── 14. FOOTER YEAR ─── */
@@ -693,7 +709,7 @@ document.getElementById('footerYear').textContent = new Date().getFullYear();
 
 /* ─── 15. AOS INIT + DEFERRED INITS (after renderer) ─── */
 document.addEventListener('DOMContentLoaded', () => {
-  if (typeof AOS !== 'undefined') {
+  if (typeof AOS !== 'undefined' && !SHOULD_MINIMIZE_MOTION) {
     AOS.init({
       duration: 700,
       easing: 'ease-out-cubic',
@@ -714,13 +730,15 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     const target = document.querySelector(anchor.getAttribute('href'));
     if (target) {
       e.preventDefault();
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      target.scrollIntoView({ behavior: SHOULD_MINIMIZE_MOTION ? 'auto' : 'smooth', block: 'start' });
     }
   });
 });
 
 /* ─── 17. SCROLL PROGRESS BAR ─── */
 (function initScrollProgress() {
+  if (SHOULD_MINIMIZE_MOTION) return;
+
   const bar = document.createElement('div');
   bar.style.cssText = `
     position: fixed; top: 0; left: 0; height: 3px; z-index: 2000;
