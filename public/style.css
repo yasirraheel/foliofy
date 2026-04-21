@@ -899,6 +899,10 @@ body.cursor-hover .cursor-inner { width: 4px; height: 4px; }
   display: flex; align-items: center; justify-content: center;
   font-size: 1.1rem; flex-shrink: 0;
 }
+.contact-card-icon,
+.skill-icon {
+  transition: transform 0.25s ease;
+}
 .contact-card-label { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 2px; }
 .contact-card-value { font-weight: 600; font-size: 0.9rem; }
 .social-links { display: flex; gap: 10px; flex-wrap: wrap; }
@@ -910,6 +914,51 @@ body.cursor-hover .cursor-inner { width: 4px; height: 4px; }
   transition: all var(--transition);
 }
 .social-link:hover { background: var(--primary); border-color: var(--primary); color: #fff; transform: translateY(-4px) scale(1.1); }
+
+/* Desktop hover polish for homepage cards */
+@media (hover: hover) and (pointer: fine) {
+  .info-item,
+  .skill-card,
+  .project-card,
+  .timeline-card,
+  .testimonial-card,
+  .contact-card-item {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .info-item::after,
+  .skill-card::after,
+  .project-card::after,
+  .timeline-card::after,
+  .testimonial-card::after,
+  .contact-card-item::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -140%;
+    width: 54%;
+    transform: skewX(-20deg);
+    background: linear-gradient(120deg, transparent 12%, hsla(250,84%,65%,0.14) 50%, transparent 88%);
+    pointer-events: none;
+    transition: left 0.5s ease;
+  }
+
+  .info-item:hover::after,
+  .skill-card:hover::after,
+  .project-card:hover::after,
+  .timeline-card:hover::after,
+  .testimonial-card:hover::after,
+  .contact-card-item:hover::after {
+    left: 140%;
+  }
+
+  .skill-card:hover .skill-icon,
+  .contact-card-item:hover .contact-card-icon {
+    transform: translateY(-2px) scale(1.04);
+  }
+}
 
 /* Contact Form */
 .contact-form-wrap {
