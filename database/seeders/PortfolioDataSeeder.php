@@ -15,6 +15,12 @@ class PortfolioDataSeeder extends Seeder
 
     public function run(): void
     {
-        $this->portfolioDataStore->replace(PortfolioDefaultData::load());
+        $source = $this->portfolioDataStore->full();
+
+        if ($source === []) {
+            $source = PortfolioDefaultData::load();
+        }
+
+        $this->portfolioDataStore->replace($source);
     }
 }

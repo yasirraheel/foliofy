@@ -228,6 +228,22 @@ class PortfolioApplicationTest extends TestCase
         $this->assertDatabaseCount('portfolio_testimonials', 0);
     }
 
+    public function test_portfolio_data_seeder_preserves_existing_database_content_when_data_already_exists(): void
+    {
+        $this->seed(PortfolioDataSeeder::class);
+
+        DB::table('portfolio_meta')->where('id', 1)->update([
+            'name' => 'Custom Live Name',
+        ]);
+
+        $this->seed(PortfolioDataSeeder::class);
+
+        $this->assertDatabaseHas('portfolio_meta', [
+            'id' => 1,
+            'name' => 'Custom Live Name',
+        ]);
+    }
+
     public function test_contact_messages_are_saved_in_mysql_and_manageable_from_admin(): void
     {
         $admin = User::factory()->create([

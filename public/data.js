@@ -30,8 +30,8 @@ const DEFAULT_DATA = {
   about: {
     heading: 'Retired Army Professional &',
     headingHighlight: 'Networking-Focused IT Candidate',
-    text1: 'I am a retired Pakistan Army professional with service from <strong>28 Apr 2003 to 28 Apr 2026</strong>, including instructor duties, leadership exposure, operational responsibility, and structured performance-focused work. My background has built strong discipline, accountability, adaptability, and the ability to work effectively under pressure.',
-    text2: 'My primary career direction is <strong>Networking</strong>. I am currently preparing for <strong>CCNA</strong> and have strong practical hands-on lab experience in <strong>Packet Tracer</strong>, including IP addressing, VLANs, routing, DHCP, NAT, ACLs, and troubleshooting. I also bring supporting skills in web development, Android development, MS Office, and AI-assisted project building, and I am open to roles in Pakistan, UAE, KSA, and Europe.',
+    text1: 'I am a retired Pakistan Army professional with service from <strong>28 Apr 2003 to 28 Apr 2026</strong>, including instructor duties, leadership exposure, operational responsibility, project management responsibilities, and structured performance-focused work. My background includes weapons training instruction, instructor-related experience at <strong>SI&T Quetta</strong>, and service as an instructor for the <strong>Kingdom of Saudi Arabia Army</strong> in Weapons and Low Intensity Conflict Training.',
+    text2: 'My primary career direction is <strong>Networking</strong>. I am currently preparing for <strong>CCNA</strong> and have strong practical hands-on lab experience in <strong>Packet Tracer</strong>, including IP addressing, VLANs, routing, DHCP, NAT, ACLs, and troubleshooting. I also hold a <strong>Recognized Instructor Certificate</strong> and a <strong>Junior Leadership and Tactical Supervision Certificate</strong> from Hazara University of Pakistan, Mansehra, while bringing supporting skills in web development, Android development, MS Office, and AI-assisted project building. I am open to roles in Pakistan, UAE, KSA, and Europe.',
     name: 'Muhammad Asif Shabbir',
     email: 'islammujahid921@gmail.com',
     location: 'Bahawalpur, Punjab, Pakistan',
@@ -80,6 +80,7 @@ const DEFAULT_DATA = {
     professionalStrengths: [
       { name: 'Leadership', iconClass: 'fas fa-user-shield', iconColor: '#0f172a', level: 100 },
       { name: 'Training and Instruction', iconClass: 'fas fa-chalkboard-user', iconColor: '#0891b2', level: 100 },
+      { name: 'Tactical Supervision', iconClass: 'fas fa-binoculars', iconColor: '#2563eb', level: 100 },
       { name: 'Discipline', iconClass: 'fas fa-medal', iconColor: '#dc2626', level: 100 },
       { name: 'Team Coordination', iconClass: 'fas fa-users', iconColor: '#2563eb', level: 100 },
       { name: 'Operations Support', iconClass: 'fas fa-compass-drafting', iconColor: '#475569', level: 100 },
@@ -802,8 +803,8 @@ const DEFAULT_DATA = {
       company: 'Pakistan Army',
       period: '28 Apr 2003 - 28 Apr 2026',
       location: 'Pakistan',
-      desc: 'Completed more than two decades of disciplined military service with responsibilities spanning training environments, operations support, leadership, team coordination, and structured execution. Built a strong record of responsibility, consistency, and performance under pressure.',
-      tags: ['Leadership', 'Discipline', 'Operations Support', 'Team Coordination'],
+      desc: 'Completed more than two decades of disciplined military service with a strong service record across training, supervision, operational support, and performance-focused environments. Responsibilities included core soldier duties, work in operational areas, participation in live operations during the War on Terror, and project management-related responsibilities requiring accountability, consistency, and performance under pressure.',
+      tags: ['Leadership', 'Discipline', 'Operations Support', 'Responsibility'],
       iconClass: 'fas fa-shield'
     },
     {
@@ -811,9 +812,18 @@ const DEFAULT_DATA = {
       company: 'Pakistan Army / SI&T Quetta',
       period: 'During military service',
       location: 'Quetta, Pakistan',
-      desc: 'Served in instructor-focused roles with responsibility for structured training delivery, performance standards, evaluation, and disciplined knowledge transfer. This background directly supports technical instruction, support roles, and process-driven work in civilian IT.',
-      tags: ['Training and Instruction', 'Performance Standards', 'Responsibility', 'Attention to Detail'],
+      desc: 'Served in instructor-focused roles with responsibility for structured training delivery, technical instruction, tactical supervision, evaluation, and disciplined knowledge transfer. Worked in training and performance-focused environments and earned recognition for professional excellence, instruction, and service quality.',
+      tags: ['Training and Instruction', 'Tactical Supervision', 'Performance Standards', 'Attention to Detail'],
       iconClass: 'fas fa-chalkboard-user'
+    },
+    {
+      title: 'Instructor Assignment - Kingdom of Saudi Arabia Army',
+      company: 'Pakistan Army / KSA Army Training Support',
+      period: 'During military service',
+      location: 'Kingdom of Saudi Arabia',
+      desc: 'Served as an instructor for the Kingdom of Saudi Arabia Army in Weapons and Low Intensity Conflict Training. This role reflects international instruction exposure, structured supervision, team coordination, adaptability, and the ability to transfer technical knowledge in disciplined operational settings.',
+      tags: ['International Instruction', 'Low Intensity Conflict Training', 'Team Coordination', 'Adaptability'],
+      iconClass: 'fas fa-globe'
     },
     {
       title: 'Networking Track - CCNA Under Preparation',
@@ -870,10 +880,10 @@ const DEFAULT_DATA = {
     },
     {
       title: 'COAS Commendation Cards',
-      subtitle: 'Recognition for Course Performance and Outstanding Service',
+      subtitle: 'Recognition for Service, Instruction, and Course Performance',
       period: '',
       highlight: 'Awarded by Two Army Chiefs',
-      description: 'Received COAS Commendation Cards from General Qamar Javed Bajwa and Field Marshal Asim Munir in recognition of professional excellence and service quality.'
+      description: 'Received COAS Commendation Cards from General Qamar Javed Bajwa and Field Marshal Asim Munir in recognition of professional excellence, instruction, and service quality.'
     }
   ],
   education: [
@@ -888,6 +898,18 @@ const DEFAULT_DATA = {
       subtitle: 'Certification Track',
       status: 'In Preparation',
       description: 'Currently preparing for CCNA with practical Packet Tracer labs and networking fundamentals.'
+    },
+    {
+      title: 'Recognized Instructor Certificate',
+      subtitle: 'Professional Credential',
+      status: 'Completed',
+      description: 'Recognized instructor credential supporting formal training, instruction, and structured supervision experience.'
+    },
+    {
+      title: 'Junior Leadership and Tactical Supervision Certificate',
+      subtitle: 'Hazara University of Pakistan, Mansehra',
+      status: 'Completed',
+      description: 'Professional credential focused on junior leadership and tactical supervision.'
     }
   ],
   languages: [
