@@ -49,6 +49,17 @@ class PageController extends Controller
     {
         $html = File::get(resource_path("views/{$viewName}.blade.php"));
         $csrfToken = csrf_token();
+        $themeDefault = in_array($portfolioData['meta']['themeDefault'] ?? null, ['dark', 'light'], true)
+            ? $portfolioData['meta']['themeDefault']
+            : 'dark';
+
+        if ($viewName === 'portfolio') {
+            $html = str_replace(
+                '<html lang="en" data-theme="dark">',
+                sprintf('<html lang="en" data-theme="%s">', e($themeDefault)),
+                $html
+            );
+        }
 
         $script = sprintf(
             '<meta name="csrf-token" content="%s">%s<script>window.__PORTFOLIO_DATA__=%s;window.__ADMIN_CONTEXT__=%s;window.__CSRF_TOKEN__=%s;</script>%s</head>',

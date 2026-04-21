@@ -76,10 +76,12 @@ class PortfolioApplicationTest extends TestCase
             ->assertSee('"name":"Muhammad Asif Shabbir"', false)
             ->assertSee('"email":"islammujahid921@gmail.com"', false)
             ->assertSee('"portfolioUrl":"https://foliofy.me/"', false)
+            ->assertSee('"themeDefault":"dark"', false)
             ->assertSee('"period":"2021 - 2024"', false)
-            ->assertSee('data.js?v=12', false)
-            ->assertSee('renderer.js?v=12', false)
-            ->assertSee('script.js?v=12', false);
+            ->assertSee('<html lang="en" data-theme="dark">', false)
+            ->assertSee('data.js?v=13', false)
+            ->assertSee('renderer.js?v=13', false)
+            ->assertSee('script.js?v=13', false);
 
         $this->assertStringContainsString('no-store', (string) $response->headers->get('Cache-Control'));
         $this->assertStringContainsString('no-cache', (string) $response->headers->get('Cache-Control'));
@@ -161,6 +163,7 @@ class PortfolioApplicationTest extends TestCase
         $payload = [
             'meta' => [
                 'name' => 'Updated Name',
+                'themeDefault' => 'light',
                 'siteTitle' => 'Updated Portfolio',
                 'siteKeywords' => 'networking, support',
             ],
@@ -185,6 +188,7 @@ class PortfolioApplicationTest extends TestCase
         $this->assertDatabaseHas('portfolio_meta', [
             'id' => 1,
             'name' => 'Updated Name',
+            'theme_default' => 'light',
             'site_title' => 'Updated Portfolio',
             'site_keywords' => 'networking, support',
         ]);
@@ -207,6 +211,7 @@ class PortfolioApplicationTest extends TestCase
             'id' => 1,
             'name' => 'Muhammad Asif Shabbir',
             'brand_text' => 'MAS',
+            'theme_default' => 'dark',
         ]);
         $this->assertDatabaseHas('portfolio_hero', [
             'id' => 1,

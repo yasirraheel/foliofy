@@ -147,7 +147,7 @@
           <div class="overview-card" data-goto="achievements"><i class="fas fa-award"></i><h3>Achievements</h3><p>Training, honors, commendations</p></div>
           <div class="overview-card" data-goto="education"><i class="fas fa-graduation-cap"></i><h3>Education</h3><p>Education, certification, languages</p></div>
           <div class="overview-card" data-goto="contact"><i class="fas fa-envelope"></i><h3>Contact</h3><p>Email, phone, social links</p></div>
-          <div class="overview-card" data-goto="settings"><i class="fas fa-cog"></i><h3>Settings</h3><p>Site meta & password</p></div>
+          <div class="overview-card" data-goto="settings"><i class="fas fa-cog"></i><h3>Settings</h3><p>Site meta, theme & password</p></div>
         </div>
         <div class="quick-tip">
           <i class="fas fa-lightbulb"></i>
@@ -491,7 +491,7 @@
       <div class="panel" id="panel-settings">
         <div class="panel-header">
           <h2 class="panel-title">Settings</h2>
-          <p class="panel-subtitle">Site metadata and admin password</p>
+          <p class="panel-subtitle">Site metadata, default theme, and admin password</p>
         </div>
         <div class="form-grid">
           <div class="form-group">
@@ -521,6 +521,13 @@
           <div class="form-group full-width">
             <label>Footer Tagline</label>
             <input type="text" id="footerTagline" />
+          </div>
+          <div class="form-group">
+            <label>Default Frontend Theme <span class="hint">Visitors start with this theme unless they choose their own</span></label>
+            <select id="metaThemeDefault">
+              <option value="dark">Dark</option>
+              <option value="light">Light</option>
+            </select>
           </div>
         </div>
 
@@ -556,7 +563,7 @@
   </div>
 </div>
 
-<script src="data.js?v=12"></script>
-<script src="admin.js?v=12"></script>
+<script src="data.js?v=13"></script>
+<script src="admin.js?v=13"></script>
 </body>
 </html>

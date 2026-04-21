@@ -210,6 +210,7 @@ function populateForms() {
   setValue('metaName',      d.meta?.name);
   setValue('metaRole',      d.meta?.role);
   setValue('metaBrandText', d.meta?.brandText);
+  setValue('metaThemeDefault', d.meta?.themeDefault || 'dark');
   setValue('metaSiteTitle', d.meta?.siteTitle);
   setValue('metaSiteDesc',  d.meta?.siteDesc);
   setValue('metaSiteKeywords', d.meta?.siteKeywords);
@@ -774,6 +775,7 @@ function collectDraft() {
   draft.meta.name      = val('metaName');
   draft.meta.role      = val('metaRole');
   draft.meta.brandText = val('metaBrandText') || draft.meta.brandText || 'MAS';
+  draft.meta.themeDefault = normalizeThemeSetting(val('metaThemeDefault'));
   draft.meta.siteTitle = val('metaSiteTitle');
   draft.meta.siteDesc  = val('metaSiteDesc');
   draft.meta.siteKeywords = val('metaSiteKeywords');
@@ -837,6 +839,10 @@ function collectDraft() {
 }
 
 function val(id) { const el = $(id); return el ? el.value : ''; }
+
+function normalizeThemeSetting(value) {
+  return value === 'light' ? 'light' : 'dark';
+}
 
 /* ══════════════════════════════════════
    11. SAVE

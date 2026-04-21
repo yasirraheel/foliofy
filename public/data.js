@@ -10,6 +10,7 @@ const DEFAULT_DATA = {
     name: 'Muhammad Asif Shabbir',
     role: 'Network Support Engineer | CCNA in Progress',
     brandText: 'MAS',
+    themeDefault: 'dark',
     siteTitle: 'Muhammad Asif Shabbir | Network Support Engineer',
     siteDesc: 'Professional portfolio of Muhammad Asif Shabbir, a networking-focused IT professional with Pakistan Army leadership experience, CCNA in progress, Packet Tracer lab practice, and supporting web and Android development skills.',
     siteKeywords: 'Muhammad Asif Shabbir, Network Support Engineer, Junior Network Engineer, NOC Engineer, IT Support, CCNA in progress, Networking, Router and Switch Configuration, Troubleshooting, VLAN, OSPF, DHCP, NAT, ACL, Packet Tracer, Technical Instructor, Military Leadership, Web Development, Android Development'

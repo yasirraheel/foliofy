@@ -24,18 +24,31 @@
   const toggle  = document.getElementById('themeToggle');
   const icon    = document.getElementById('themeIcon');
   const html    = document.documentElement;
-  const saved   = localStorage.getItem('portfolioTheme') || 'dark';
+  const storageKey = 'portfolioThemePreference';
+  const legacyStorageKey = 'portfolioTheme';
+  const adminDefault = (() => {
+    const fromData = window.__PORTFOLIO_DATA__?.meta?.themeDefault;
+    if (fromData === 'light' || fromData === 'dark') return fromData;
+    const fromHtml = html.getAttribute('data-theme');
+    return fromHtml === 'light' ? 'light' : 'dark';
+  })();
+  const saved = localStorage.getItem(storageKey) || localStorage.getItem(legacyStorageKey);
+  const normalize = (theme) => theme === 'light' ? 'light' : 'dark';
 
-  const apply = (theme) => {
-    html.setAttribute('data-theme', theme);
-    icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-    localStorage.setItem('portfolioTheme', theme);
+  const apply = (theme, { persist = false } = {}) => {
+    const nextTheme = normalize(theme);
+    html.setAttribute('data-theme', nextTheme);
+    icon.className = nextTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    if (persist) {
+      localStorage.setItem(storageKey, nextTheme);
+      localStorage.removeItem(legacyStorageKey);
+    }
   };
 
-  apply(saved);
+  apply(saved || adminDefault);
   toggle.addEventListener('click', () => {
     const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    apply(next);
+    apply(next, { persist: true });
   });
 })();
 
