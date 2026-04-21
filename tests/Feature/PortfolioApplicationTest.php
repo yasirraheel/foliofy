@@ -97,6 +97,7 @@ class PortfolioApplicationTest extends TestCase
 
         $this->assertStringContainsString('DirectoryIndex index.php', $rootHtaccess);
         $this->assertStringContainsString('public/$1', $rootHtaccess);
+        $this->assertStringContainsString('RewriteRule ^uploads/(.*)$ public/uploads/$1 [L]', $rootHtaccess);
         $this->assertStringContainsString('index.php [L]', $rootHtaccess);
         $this->assertStringContainsString('index\\.html|admin\\.html', $rootHtaccess);
     }

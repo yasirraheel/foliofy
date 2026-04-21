@@ -19,6 +19,7 @@ DirectoryIndex index.php
 
     # Serve browser assets from /public even when the live server points at the repo root.
     RewriteRule ^(admin\.css|admin\.js|data\.js|renderer\.js|script\.js|style\.css|profile\.png|preview_about\.png|preview_hero\.png|preview_projects\.png|preview_skills\.png|favicon\.ico|robots\.txt)$ public/$1 [L]
+    RewriteRule ^uploads/(.*)$ public/uploads/$1 [L]
 
     # Force the old root-level entry files through Laravel instead of the stale static copies.
     RewriteRule ^(index\.html|admin\.html|api_messages\.php|upload\.php|wa_proxy\.php)$ index.php [L]
