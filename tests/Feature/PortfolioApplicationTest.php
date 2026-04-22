@@ -20,6 +20,8 @@ class PortfolioApplicationTest extends TestCase
 
     private string $profileImagePath;
 
+    private string $ogImagePath;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -29,19 +31,23 @@ class PortfolioApplicationTest extends TestCase
 
         $this->uploadsPath = $basePath.'/uploads';
         $this->profileImagePath = $basePath.'/profile.png';
+        $this->ogImagePath = $basePath.'/og-image.jpg';
 
         File::delete($this->profileImagePath);
+        File::delete($this->ogImagePath);
         File::deleteDirectory($this->uploadsPath);
 
         config([
             'portfolio.uploads_path' => $this->uploadsPath,
             'portfolio.profile_image_path' => $this->profileImagePath,
+            'portfolio.og_image_path' => $this->ogImagePath,
         ]);
     }
 
     protected function tearDown(): void
     {
         File::delete($this->profileImagePath);
+        File::delete($this->ogImagePath);
         File::deleteDirectory($this->uploadsPath);
 
         parent::tearDown();
@@ -86,6 +92,31 @@ class PortfolioApplicationTest extends TestCase
 
         $this->assertStringContainsString('no-store', (string) $response->headers->get('Cache-Control'));
         $this->assertStringContainsString('no-cache', (string) $response->headers->get('Cache-Control'));
+    }
+
+    public function test_public_page_renders_server_side_social_meta_for_large_image_cards(): void
+    {
+        $this->seed(PortfolioDataSeeder::class);
+        $this->createProfileImage(700, 1100);
+
+        $response = $this->get('/');
+
+        $response
+            ->assertOk()
+            ->assertSee('<meta property="og:image" content="http://localhost/og-image.jpg?v=', false)
+            ->assertSee('<meta property="og:image:width" content="1200" />', false)
+            ->assertSee('<meta property="og:image:height" content="630" />', false)
+            ->assertSee('<meta name="twitter:card" content="summary_large_image" />', false)
+            ->assertSee('<meta name="twitter:title" content="Muhammad Asif Shabbir | Network Support Engineer" />', false)
+            ->assertSee('<meta name="twitter:description" content="Professional portfolio of Muhammad Asif Shabbir, a networking-focused IT professional with Pakistan Army leadership experience, CCNA in progress, Packet Tracer lab practice, and supporting web and Android development skills." />', false)
+            ->assertSee('<meta name="twitter:image" content="http://localhost/og-image.jpg?v=', false);
+
+        $this->assertTrue(File::exists($this->ogImagePath));
+
+        [$width, $height] = getimagesize($this->ogImagePath);
+
+        $this->assertSame(1200, $width);
+        $this->assertSame(630, $height);
     }
 
     public function test_project_root_bridges_live_server_requests_into_laravel(): void
@@ -325,6 +356,12 @@ class PortfolioApplicationTest extends TestCase
         $this->assertStringStartsWith('uploads/', $uploadedUrl);
         $this->assertTrue(File::exists($this->uploadsPath.'/'.basename($uploadedUrl)));
         $this->assertTrue(File::exists($this->profileImagePath));
+        $this->assertTrue(File::exists($this->ogImagePath));
+
+        [$width, $height] = getimagesize($this->ogImagePath);
+
+        $this->assertSame(1200, $width);
+        $this->assertSame(630, $height);
     }
 
     public function test_upload_endpoint_allows_admin_cv_pdf_uploads(): void
@@ -350,5 +387,27 @@ class PortfolioApplicationTest extends TestCase
         $this->assertStringStartsWith('uploads/cv_', $uploadedUrl);
         $this->assertStringEndsWith('.pdf', $uploadedUrl);
         $this->assertTrue(File::exists($this->uploadsPath.'/'.basename($uploadedUrl)));
+    }
+
+    public function test_og_image_route_serves_the_generated_social_preview_asset(): void
+    {
+        $this->createProfileImage(680, 1180);
+
+        $response = $this->get('/og-image.jpg');
+
+        $response->assertOk();
+        $this->assertStringContainsString('image/jpeg', (string) $response->headers->get('Content-Type'));
+        $this->assertTrue(File::exists($this->ogImagePath));
+
+        [$width, $height] = getimagesize($this->ogImagePath);
+
+        $this->assertSame(1200, $width);
+        $this->assertSame(630, $height);
+    }
+
+    private function createProfileImage(int $width, int $height): void
+    {
+        $image = UploadedFile::fake()->image('profile.png', $width, $height);
+        File::copy($image->getPathname(), $this->profileImagePath);
     }
 }

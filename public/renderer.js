@@ -59,23 +59,31 @@ const PortfolioRenderer = {
 
   renderMeta() {
     const { meta } = this.data;
+    const pageMeta = window.__PORTFOLIO_META__ || {};
     document.title = meta.siteTitle || document.title;
 
     const setMeta = (selector, value, attr = 'content') => {
       document.querySelectorAll(selector).forEach((tag) => tag.setAttribute(attr, value || ''));
     };
 
-    setMeta('meta[name="description"], meta[property="og:description"], meta[property="twitter:description"]', meta.siteDesc || '');
+    setMeta('meta[name="description"], meta[property="og:description"], meta[name="twitter:description"], meta[property="twitter:description"]', meta.siteDesc || '');
     setMeta('meta[name="keywords"]', meta.siteKeywords || '');
     setMeta('meta[name="author"]', meta.name || '');
-    setMeta('meta[property="og:title"], meta[property="twitter:title"]', meta.siteTitle || '');
+    setMeta('meta[property="og:title"], meta[name="twitter:title"], meta[property="twitter:title"]', meta.siteTitle || '');
 
-    const currentUrl = window.location.href.split('?')[0];
-    const absoluteImageUrl = new URL('profile.png?v=3', window.location.origin + window.location.pathname).href;
+    const currentUrl = pageMeta.canonicalUrl || window.location.href.split('?')[0];
+    const absoluteImageUrl = pageMeta.ogImageUrl || new URL('/og-image.jpg', window.location.origin).href;
+    const imageAlt = pageMeta.ogImageAlt || `${meta.name || meta.siteTitle || 'Portfolio'} profile preview image`;
+    const imageWidth = String(pageMeta.ogImageWidth || 1200);
+    const imageHeight = String(pageMeta.ogImageHeight || 630);
 
     document.querySelectorAll('link[rel="canonical"]').forEach((tag) => tag.setAttribute('href', currentUrl));
-    setMeta('meta[property="og:url"], meta[property="twitter:url"]', currentUrl);
-    setMeta('meta[property="og:image"], meta[property="twitter:image"]', absoluteImageUrl);
+    setMeta('meta[property="og:url"], meta[name="twitter:url"], meta[property="twitter:url"]', currentUrl);
+    setMeta('meta[property="og:image"], meta[name="twitter:image"], meta[property="twitter:image"]', absoluteImageUrl);
+    setMeta('meta[property="og:image:width"]', imageWidth);
+    setMeta('meta[property="og:image:height"]', imageHeight);
+    setMeta('meta[property="og:image:alt"], meta[name="twitter:image:alt"], meta[property="twitter:image:alt"]', imageAlt);
+    setMeta('meta[name="twitter:card"], meta[property="twitter:card"]', 'summary_large_image');
 
     const initials = meta.brandText
       ? meta.brandText.trim()

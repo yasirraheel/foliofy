@@ -3,23 +3,29 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Muhammad Asif Shabbir | Network Support Engineer</title>
-  <meta name="description" content="Professional portfolio of Muhammad Asif Shabbir, a networking-focused IT professional with Pakistan Army leadership experience, CCNA in progress, Packet Tracer lab practice, and supporting web and Android development skills." />
-  <meta name="keywords" content="Muhammad Asif Shabbir, Network Support Engineer, Junior Network Engineer, NOC Engineer, IT Support, CCNA in progress, Networking, Router and Switch Configuration, Troubleshooting, VLAN, OSPF, DHCP, NAT, ACL, Packet Tracer, Technical Instructor, Military Leadership, Web Development, Android Development" />
-  <meta name="author" content="Muhammad Asif Shabbir" />
-  <link rel="canonical" href="https://foliofy.me/" />
+  <title>__PORTFOLIO_TITLE__</title>
+  <meta name="description" content="__PORTFOLIO_DESCRIPTION__" />
+  <meta name="keywords" content="__PORTFOLIO_KEYWORDS__" />
+  <meta name="author" content="__PORTFOLIO_AUTHOR__" />
+  <link rel="canonical" href="__PORTFOLIO_CANONICAL_URL__" />
 
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://foliofy.me/" />
-  <meta property="og:title" content="Muhammad Asif Shabbir | Network Support Engineer" />
-  <meta property="og:description" content="Networking-focused IT professional with Pakistan Army leadership experience, CCNA in progress, and practical Packet Tracer lab exposure." />
-  <meta property="og:image" content="https://foliofy.me/profile.png?v=3" />
+  <meta property="og:site_name" content="__PORTFOLIO_SITE_NAME__" />
+  <meta property="og:url" content="__PORTFOLIO_CANONICAL_URL__" />
+  <meta property="og:title" content="__PORTFOLIO_TITLE__" />
+  <meta property="og:description" content="__PORTFOLIO_DESCRIPTION__" />
+  <meta property="og:image" content="__PORTFOLIO_OG_IMAGE_URL__" />
+  <meta property="og:image:type" content="image/jpeg" />
+  <meta property="og:image:width" content="__PORTFOLIO_OG_IMAGE_WIDTH__" />
+  <meta property="og:image:height" content="__PORTFOLIO_OG_IMAGE_HEIGHT__" />
+  <meta property="og:image:alt" content="__PORTFOLIO_OG_IMAGE_ALT__" />
 
-  <meta property="twitter:card" content="summary_large_image" />
-  <meta property="twitter:url" content="https://foliofy.me/" />
-  <meta property="twitter:title" content="Muhammad Asif Shabbir | Network Support Engineer" />
-  <meta property="twitter:description" content="Networking-focused IT professional with Pakistan Army leadership experience, CCNA in progress, and practical Packet Tracer lab exposure." />
-  <meta property="twitter:image" content="https://foliofy.me/profile.png?v=3" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="__PORTFOLIO_CANONICAL_URL__" />
+  <meta name="twitter:title" content="__PORTFOLIO_TITLE__" />
+  <meta name="twitter:description" content="__PORTFOLIO_DESCRIPTION__" />
+  <meta name="twitter:image" content="__PORTFOLIO_OG_IMAGE_URL__" />
+  <meta name="twitter:image:alt" content="__PORTFOLIO_OG_IMAGE_ALT__" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

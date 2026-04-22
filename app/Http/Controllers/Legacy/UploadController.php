@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Legacy;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\OgImageGenerator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,6 +17,11 @@ class UploadController extends Controller
         'Access-Control-Allow-Methods' => 'POST, OPTIONS',
         'Access-Control-Allow-Headers' => 'Content-Type',
     ];
+
+    public function __construct(
+        private readonly OgImageGenerator $ogImageGenerator,
+    ) {
+    }
 
     public function __invoke(Request $request): JsonResponse
     {
@@ -92,6 +98,7 @@ class UploadController extends Controller
             ($assetKey === 'hero' || $assetKey === '' || $assetKey === 'about')
         ) {
             File::copy($destPath, (string) config('portfolio.profile_image_path'));
+            $this->ogImageGenerator->ensureGenerated();
         }
 
         $replaces = basename((string) $request->input('replaces', ''));
