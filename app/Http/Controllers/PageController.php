@@ -6,12 +6,48 @@ use App\Models\User;
 use App\Support\OgImageGenerator;
 use App\Support\PortfolioDataStore;
 use Illuminate\Http\Response;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class PageController extends Controller
 {
+    private const SKILL_CATEGORY_META = [
+        'networking' => [
+            'label' => 'Networking',
+            'description' => 'Primary focus for network support, troubleshooting, routing, switching, and practical Packet Tracer implementation.',
+        ],
+        'webDevelopment' => [
+            'label' => 'Web Development',
+            'description' => 'Secondary supporting skills for web-based solutions, Laravel applications, and content-driven development.',
+        ],
+        'androidDevelopment' => [
+            'label' => 'Android Development',
+            'description' => 'Supporting mobile development capabilities with Java, Android Studio, and Firebase.',
+        ],
+        'productivityTools' => [
+            'label' => 'Productivity Tools',
+            'description' => 'Day-to-day tools for documentation, reporting, structured work, and AI-assisted project building.',
+        ],
+        'professionalStrengths' => [
+            'label' => 'Professional Strengths',
+            'description' => 'Transferable strengths shaped by military service, instruction, coordination, and disciplined execution.',
+        ],
+        'frontend' => [
+            'label' => 'Frontend',
+            'description' => 'Frontend skills carried forward from earlier project work.',
+        ],
+        'backend' => [
+            'label' => 'Backend',
+            'description' => 'Backend and server-side development skills from existing project work.',
+        ],
+        'tools' => [
+            'label' => 'Tools',
+            'description' => 'General tools and supporting technology skills.',
+        ],
+    ];
+
     public function __construct(
         private readonly PortfolioDataStore $portfolioDataStore,
         private readonly OgImageGenerator $ogImageGenerator,
@@ -20,9 +56,11 @@ class PageController extends Controller
 
     public function portfolio(): Response
     {
+        $portfolioData = $this->portfolioDataStore->publicWithDefaults();
+
         return $this->htmlResponse(
             'portfolio',
-            $this->portfolioDataStore->public(),
+            $portfolioData,
             [
                 'authenticated' => false,
                 'user' => null,
@@ -64,27 +102,59 @@ class PageController extends Controller
         ]);
     }
 
+    public function sitemap(): Response
+    {
+        $portfolioData = $this->portfolioDataStore->publicWithDefaults();
+        $canonicalUrl = $this->canonicalUrl(Arr::get($portfolioData, 'contact.portfolioUrl'));
+
+        $xml = implode(PHP_EOL, [
+            '<?xml version="1.0" encoding="UTF-8"?>',
+            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+            '  <url>',
+            '    <loc>'.e($canonicalUrl).'</loc>',
+            '  </url>',
+            '</urlset>',
+        ]);
+
+        return response($xml, 200, [
+            'Content-Type' => 'application/xml; charset=UTF-8',
+            'Cache-Control' => 'public, max-age=3600',
+        ]);
+    }
+
+    public function robots(): Response
+    {
+        $portfolioData = $this->portfolioDataStore->publicWithDefaults();
+        $canonicalUrl = $this->canonicalUrl(Arr::get($portfolioData, 'contact.portfolioUrl'));
+        $sitemapUrl = $this->joinUrl($canonicalUrl, 'sitemap.xml');
+
+        $robots = implode(PHP_EOL, [
+            'User-agent: *',
+            'Allow: /',
+            'Sitemap: '.$sitemapUrl,
+            '',
+        ]);
+
+        return response($robots, 200, [
+            'Content-Type' => 'text/plain; charset=UTF-8',
+            'Cache-Control' => 'public, max-age=3600',
+        ]);
+    }
+
     private function htmlResponse(string $viewName, array $portfolioData, array $adminContext): Response
     {
-        $html = File::get(resource_path("views/{$viewName}.blade.php"));
         $csrfToken = csrf_token();
         $pageMeta = $viewName === 'portfolio'
             ? $this->portfolioPageMeta($portfolioData)
             : [];
-        $themeDefault = in_array($portfolioData['meta']['themeDefault'] ?? null, ['dark', 'light'], true)
-            ? $portfolioData['meta']['themeDefault']
-            : 'dark';
 
         if ($viewName === 'portfolio') {
-            $html = str_replace(
-                '<html lang="en" data-theme="dark">',
-                sprintf('<html lang="en" data-theme="%s">', e($themeDefault)),
-                $html
+            $html = $this->renderPhpTemplate(
+                resource_path('views/portfolio.blade.php'),
+                $this->portfolioViewData($portfolioData, $pageMeta)
             );
-        }
-
-        if ($viewName === 'portfolio') {
-            $html = $this->applyPortfolioMeta($html, $pageMeta);
+        } else {
+            $html = File::get(resource_path("views/{$viewName}.blade.php"));
         }
 
         $html = $this->applyAssetVersioning($html);
@@ -170,20 +240,14 @@ class PageController extends Controller
         ];
     }
 
-    private function applyPortfolioMeta(string $html, array $pageMeta): string
+    private function portfolioViewData(array $portfolioData, array $pageMeta): array
     {
-        return strtr($html, [
-            '__PORTFOLIO_TITLE__' => e($pageMeta['title'] ?? ''),
-            '__PORTFOLIO_DESCRIPTION__' => e($pageMeta['description'] ?? ''),
-            '__PORTFOLIO_KEYWORDS__' => e($pageMeta['keywords'] ?? ''),
-            '__PORTFOLIO_AUTHOR__' => e($pageMeta['author'] ?? ''),
-            '__PORTFOLIO_SITE_NAME__' => e($pageMeta['siteName'] ?? ''),
-            '__PORTFOLIO_CANONICAL_URL__' => e($pageMeta['canonicalUrl'] ?? ''),
-            '__PORTFOLIO_OG_IMAGE_URL__' => e($pageMeta['ogImageUrl'] ?? ''),
-            '__PORTFOLIO_OG_IMAGE_ALT__' => e($pageMeta['ogImageAlt'] ?? ''),
-            '__PORTFOLIO_OG_IMAGE_WIDTH__' => (string) ($pageMeta['ogImageWidth'] ?? 1200),
-            '__PORTFOLIO_OG_IMAGE_HEIGHT__' => (string) ($pageMeta['ogImageHeight'] ?? 630),
-        ]);
+        return [
+            'portfolio' => $portfolioData,
+            'pageMeta' => $pageMeta,
+            'skillCategoryMeta' => self::SKILL_CATEGORY_META,
+            'structuredDataJson' => $this->portfolioStructuredDataJson($portfolioData, $pageMeta),
+        ];
     }
 
     private function canonicalUrl(mixed $portfolioUrl): string
@@ -210,6 +274,116 @@ class PageController extends Controller
         $text = trim(strip_tags((string) $value));
 
         return preg_replace('/\s+/u', ' ', $text) ?? $text;
+    }
+
+    private function portfolioStructuredDataJson(array $portfolioData, array $pageMeta): string
+    {
+        $canonicalUrl = (string) ($pageMeta['canonicalUrl'] ?? url('/'));
+        $personName = $this->cleanMetaText(
+            Arr::get($portfolioData, 'about.name')
+            ?: Arr::get($portfolioData, 'meta.name')
+            ?: Arr::get($pageMeta, 'title', 'Portfolio')
+        );
+        $jobTitle = $this->cleanMetaText((string) Arr::get($portfolioData, 'meta.role', ''));
+        $description = $this->cleanMetaText((string) Arr::get($pageMeta, 'description', ''));
+        $imageUrl = $this->absoluteUrl((string) Arr::get($portfolioData, 'images.hero', ''), (string) Arr::get($pageMeta, 'ogImageUrl', ''));
+        $sameAs = array_values(array_filter([
+            $this->cleanMetaText((string) Arr::get($portfolioData, 'contact.social.github', '')),
+            $this->cleanMetaText((string) Arr::get($portfolioData, 'contact.social.linkedin', '')),
+            $this->cleanMetaText((string) Arr::get($portfolioData, 'contact.social.twitter', '')),
+            $this->cleanMetaText((string) Arr::get($portfolioData, 'contact.social.dribbble', '')),
+            $this->cleanMetaText((string) Arr::get($portfolioData, 'contact.social.instagram', '')),
+        ]));
+
+        $knowsAbout = [];
+        foreach ((array) ($portfolioData['skills'] ?? []) as $items) {
+            foreach ((array) $items as $skill) {
+                $name = $this->cleanMetaText((string) ($skill['name'] ?? ''));
+                if ($name !== '') {
+                    $knowsAbout[$name] = $name;
+                }
+            }
+        }
+
+        $graph = [
+            [
+                '@context' => 'https://schema.org',
+                '@type' => 'WebSite',
+                '@id' => $canonicalUrl.'#website',
+                'url' => $canonicalUrl,
+                'name' => $this->cleanMetaText((string) Arr::get($pageMeta, 'siteName', $personName)),
+                'description' => $description,
+            ],
+            [
+                '@context' => 'https://schema.org',
+                '@type' => 'WebPage',
+                '@id' => $canonicalUrl.'#webpage',
+                'url' => $canonicalUrl,
+                'name' => $this->cleanMetaText((string) Arr::get($pageMeta, 'title', $personName)),
+                'description' => $description,
+                'isPartOf' => [
+                    '@id' => $canonicalUrl.'#website',
+                ],
+                'about' => [
+                    '@id' => $canonicalUrl.'#person',
+                ],
+            ],
+            [
+                '@context' => 'https://schema.org',
+                '@type' => 'Person',
+                '@id' => $canonicalUrl.'#person',
+                'name' => $personName,
+                'url' => $canonicalUrl,
+                'image' => $imageUrl,
+                'jobTitle' => $jobTitle,
+                'description' => $description,
+                'email' => Arr::get($portfolioData, 'contact.email')
+                    ? 'mailto:'.$this->cleanMetaText((string) Arr::get($portfolioData, 'contact.email'))
+                    : null,
+                'telephone' => $this->cleanMetaText((string) Arr::get($portfolioData, 'contact.phone', '')) ?: null,
+                'address' => $this->cleanMetaText((string) Arr::get($portfolioData, 'contact.location', '')) ?: null,
+                'sameAs' => $sameAs === [] ? null : $sameAs,
+                'knowsAbout' => array_values($knowsAbout),
+            ],
+        ];
+
+        return (string) json_encode(
+            array_values(array_map(
+                fn (array $item): array => array_filter($item, fn ($value) => $value !== null && $value !== [] && $value !== ''),
+                $graph
+            )),
+            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT
+        );
+    }
+
+    private function absoluteUrl(string $path, string $fallback = ''): string
+    {
+        $candidate = trim($path);
+
+        if ($candidate === '' || str_starts_with($candidate, 'data:')) {
+            return $fallback !== '' ? $fallback : url('/profile.png');
+        }
+
+        if (filter_var($candidate, FILTER_VALIDATE_URL)) {
+            return $candidate;
+        }
+
+        return url('/'.ltrim($candidate, '/'));
+    }
+
+    private function joinUrl(string $base, string $path): string
+    {
+        return rtrim($base, '/').'/'.ltrim($path, '/');
+    }
+
+    private function renderPhpTemplate(string $path, array $data): string
+    {
+        extract($data, EXTR_SKIP);
+
+        ob_start();
+        include $path;
+
+        return (string) ob_get_clean();
     }
 
     private function adminUser(): ?User

@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [PageController::class, 'portfolio']);
 Route::get('/index.html', [PageController::class, 'portfolio']);
 Route::get('/og-image.jpg', [PageController::class, 'ogImage']);
+Route::get('/robots.txt', [PageController::class, 'robots']);
+Route::get('/sitemap.xml', [PageController::class, 'sitemap']);
 Route::get('/admin', [PageController::class, 'admin']);
 Route::get('/admin.html', [PageController::class, 'admin']);
 

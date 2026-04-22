@@ -119,6 +119,41 @@ class PortfolioApplicationTest extends TestCase
         $this->assertSame(630, $height);
     }
 
+    public function test_public_page_renders_main_sections_in_server_html_for_seo(): void
+    {
+        $this->seed(PortfolioDataSeeder::class);
+
+        $response = $this->get('/');
+
+        $response
+            ->assertOk()
+            ->assertSee('<span class="skill-name">IP Addressing and Subnetting</span>', false)
+            ->assertSee('<h3 class="project-title">CineWorm Web Platform</h3>', false)
+            ->assertSee('<h3 class="timeline-title">Instructor Assignment - Kingdom of Saudi Arabia Army</h3>', false)
+            ->assertSee('<script type="application/ld+json">', false)
+            ->assertSee('"@type": "Person"', false)
+            ->assertDontSee('Need user input');
+    }
+
+    public function test_robots_and_sitemap_are_served_from_laravel_with_the_canonical_url(): void
+    {
+        $this->seed(PortfolioDataSeeder::class);
+
+        $this->get('/robots.txt')
+            ->assertOk()
+            ->assertSee('User-agent: *', false)
+            ->assertSee('Sitemap: https://foliofy.me/sitemap.xml', false);
+
+        $sitemap = $this->get('/sitemap.xml');
+
+        $sitemap
+            ->assertOk()
+            ->assertSee('<?xml version="1.0" encoding="UTF-8"?>', false)
+            ->assertSee('<loc>https://foliofy.me/</loc>', false);
+
+        $this->assertStringContainsString('application/xml', (string) $sitemap->headers->get('Content-Type'));
+    }
+
     public function test_project_root_bridges_live_server_requests_into_laravel(): void
     {
         $this->assertFileExists(base_path('index.php'));

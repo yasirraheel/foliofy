@@ -350,10 +350,7 @@ const PortfolioRenderer = {
       return;
     }
 
-    const pageSize = () => window.innerWidth <= 768 ? 4 : 6;
-    let visibleCount = pageSize();
     const bar = document.getElementById('projectsShowMoreBar');
-    const button = document.getElementById('projectsShowMoreBtn');
 
     const cardHtml = (project, index) => `
       <div class="project-card" data-category="${this.escapeHtml(project.category || '')}" data-aos="fade-up" data-aos-delay="${(index % 3 + 1) * 100}">
@@ -378,16 +375,10 @@ const PortfolioRenderer = {
         ? projects
         : projects.filter((project) => project.category === activeFilter);
 
-      grid.innerHTML = filtered.slice(0, visibleCount).map((project, index) => cardHtml(project, index)).join('');
+      grid.innerHTML = filtered.map((project, index) => cardHtml(project, index)).join('');
 
-      const remaining = Math.max(0, filtered.length - visibleCount);
       if (bar) {
-        bar.style.display = remaining > 0 ? 'flex' : 'none';
-      }
-      const label = document.getElementById('projectsShowMoreLabel');
-      if (label) {
-        const nextPage = Math.min(pageSize(), remaining);
-        label.textContent = remaining > 0 ? `Show ${nextPage} More (${remaining} remaining)` : 'Show More';
+        bar.style.display = 'none';
       }
 
       if (window.AOS) {
@@ -403,29 +394,9 @@ const PortfolioRenderer = {
       }
       filterBtn.dataset.rendererBound = '1';
       filterBtn.addEventListener('click', () => {
-        visibleCount = pageSize();
         render();
       });
     });
-
-    if (button && button.dataset.rendererBound !== '1') {
-      button.dataset.rendererBound = '1';
-      button.addEventListener('click', () => {
-        visibleCount += pageSize();
-        render();
-      });
-    }
-
-    if (!window._portfolioProjectsResizeBound) {
-      window._portfolioProjectsResizeBound = true;
-      window.addEventListener('resize', () => {
-        const minimum = pageSize();
-        if (visibleCount < minimum) {
-          visibleCount = minimum;
-        }
-        render();
-      }, { passive: true });
-    }
   },
 
   renderExperience() {
@@ -532,8 +503,8 @@ const PortfolioRenderer = {
     }
 
     this.configureContactCard(document.getElementById('contactPortfolio'), contact.portfolioUrl, this.displayUrl(contact.portfolioUrl) || 'Portfolio', !!contact.portfolioUrl, true);
-    this.configureContactCard(document.getElementById('contactResume'), contact.resumeUrl || '#contact', contact.resumeUrl ? 'View PDF CV' : 'Need user input', !!contact.resumeUrl, true);
-    this.configureDownloadCard(document.getElementById('contactResumeDownload'), contact.resumeUrl || '#contact', contact.resumeUrl ? 'Download PDF CV' : 'Need user input', !!contact.resumeUrl);
+    this.configureContactCard(document.getElementById('contactResume'), contact.resumeUrl || '#contact', contact.resumeUrl ? 'View PDF CV' : 'CV available on request', !!contact.resumeUrl, true);
+    this.configureDownloadCard(document.getElementById('contactResumeDownload'), contact.resumeUrl || '#contact', contact.resumeUrl ? 'Download PDF CV' : 'CV available on request', !!contact.resumeUrl);
 
     this.configureSocialLink('socialGithub', contact.social?.github);
     this.configureSocialLink('socialLinkedin', contact.social?.linkedin);
@@ -605,9 +576,9 @@ const PortfolioRenderer = {
     element.removeAttribute('rel');
 
     if (textNode) {
-      textNode.textContent = label === 'View CV' ? 'CV Link Needed' : label;
-    } else if (label === 'View CV') {
-      element.textContent = 'CV Link Needed';
+      textNode.textContent = label === 'View CV' || label === 'Download CV' ? 'CV Available On Request' : label;
+    } else if (label === 'View CV' || label === 'Download CV') {
+      element.textContent = 'CV Available On Request';
     }
   },
 

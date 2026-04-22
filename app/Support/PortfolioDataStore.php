@@ -53,6 +53,14 @@ class PortfolioDataStore
         return $data;
     }
 
+    public function publicWithDefaults(): array
+    {
+        return $this->mergeRecursive(
+            PortfolioDefaultData::load(),
+            $this->public()
+        );
+    }
+
     public function save(array $data): array
     {
         $merged = $this->mergeRecursive($this->full(), $data);
