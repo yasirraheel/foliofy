@@ -31,10 +31,28 @@ class AdminAuthController extends Controller
         ]);
     }
 
+    public function ping(Request $request): JsonResponse
+    {
+        $admin = $this->adminUser();
+
+        if (! $admin) {
+            return response()->json(['error' => 'Unauthenticated.'], 401);
+        }
+
+        // Touch the session so dashboard-only activity still refreshes last activity.
+        $request->session()->put('_admin_keep_alive_at', now()->timestamp);
+
+        return response()->json([
+            'authenticated' => true,
+            'timestamp' => now()->toIso8601String(),
+        ]);
+    }
+
     public function login(Request $request): JsonResponse
     {
         $payload = $request->isJson() ? $request->json()->all() : $request->all();
         $password = (string) ($payload['password'] ?? '');
+        $remember = filter_var($payload['remember'] ?? false, FILTER_VALIDATE_BOOL);
 
         if ($password === '') {
             return response()->json(['error' => 'Password is required.'], 422);
@@ -49,7 +67,7 @@ class AdminAuthController extends Controller
             return response()->json(['error' => 'Incorrect password. Try again.'], 422);
         }
 
-        Auth::login($admin);
+        Auth::login($admin, $remember);
         $request->session()->regenerate();
 
         return response()->json([

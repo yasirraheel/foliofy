@@ -17,6 +17,7 @@ Route::get('/admin', [PageController::class, 'admin']);
 Route::get('/admin.html', [PageController::class, 'admin']);
 
 Route::get('/admin/bootstrap', [AdminAuthController::class, 'bootstrap']);
+Route::get('/admin/ping', [AdminAuthController::class, 'ping']);
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 Route::post('/admin/logout', [AdminAuthController::class, 'logout']);
 Route::post('/admin/password', [AdminAuthController::class, 'updatePassword']);

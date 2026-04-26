@@ -10,6 +10,10 @@
 const $ = id => document.getElementById(id);
 const csrfToken = window.__CSRF_TOKEN__ || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 let dashboardInitialized = false;
+const SESSION_KEEP_ALIVE_MS = 4 * 60 * 1000;
+let sessionKeepAliveTimer = null;
+let keepAliveListenersBound = false;
+let keepAliveInFlight = false;
 
 const SKILL_TABS = [
   { key: 'networking', label: 'Networking' },
@@ -35,7 +39,7 @@ const removeToast = el => {
 };
 
 async function requestJson(url, options = {}) {
-  const { method = 'GET', data, headers = {} } = options;
+  const { method = 'GET', data, headers = {}, ...fetchOptions } = options;
   const requestHeaders = { Accept: 'application/json', ...headers };
 
   if (method !== 'GET' && method !== 'HEAD' && csrfToken) {
@@ -49,7 +53,9 @@ async function requestJson(url, options = {}) {
   const response = await fetch(url, {
     method,
     headers: requestHeaders,
-    body: data === undefined ? undefined : JSON.stringify(data)
+    body: data === undefined ? undefined : JSON.stringify(data),
+    credentials: 'same-origin',
+    ...fetchOptions
   });
 
   const contentType = response.headers.get('content-type') || '';
@@ -59,6 +65,12 @@ async function requestJson(url, options = {}) {
     const error = new Error(payload.error || payload.message || 'Request failed.');
     error.status = response.status;
     error.payload = payload;
+
+    if (response.status === 401 && url !== '/admin/login') {
+      stopSessionKeepAlive();
+      showLogin('Your session expired. Please log in again.');
+    }
+
     throw error;
   }
 
@@ -74,6 +86,7 @@ function showDashboard(data) {
 
   $('loginScreen').style.display = 'none';
   $('dashboard').style.display = 'flex';
+  startSessionKeepAlive();
 
   if (!dashboardInitialized) {
     dashboardInitialized = true;
@@ -86,9 +99,77 @@ function showDashboard(data) {
 }
 
 function showLogin(error = '') {
+  stopSessionKeepAlive();
   $('dashboard').style.display = 'none';
   $('loginScreen').style.display = 'flex';
+  $('loginPasswordInput').value = '';
   $('loginError').textContent = error;
+}
+
+function isDashboardVisible() {
+  return $('dashboard')?.style.display !== 'none';
+}
+
+async function pingAdminSession({ silent = false } = {}) {
+  if (!isDashboardVisible() || keepAliveInFlight) {
+    return true;
+  }
+
+  keepAliveInFlight = true;
+
+  try {
+    await requestJson('/admin/ping', {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache' }
+    });
+    return true;
+  } catch (error) {
+    if (error.status === 401) {
+      if (!silent) {
+        toast('Your session expired. Please log in again.', 'warning');
+      }
+      return false;
+    }
+
+    return true;
+  } finally {
+    keepAliveInFlight = false;
+  }
+}
+
+function stopSessionKeepAlive() {
+  if (sessionKeepAliveTimer !== null) {
+    window.clearInterval(sessionKeepAliveTimer);
+    sessionKeepAliveTimer = null;
+  }
+}
+
+function startSessionKeepAlive() {
+  stopSessionKeepAlive();
+
+  sessionKeepAliveTimer = window.setInterval(() => {
+    if (document.visibilityState === 'visible') {
+      void pingAdminSession({ silent: true });
+    }
+  }, SESSION_KEEP_ALIVE_MS);
+
+  if (keepAliveListenersBound) {
+    return;
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && isDashboardVisible()) {
+      void pingAdminSession({ silent: true });
+    }
+  });
+
+  window.addEventListener('focus', () => {
+    if (isDashboardVisible()) {
+      void pingAdminSession({ silent: true });
+    }
+  });
+
+  keepAliveListenersBound = true;
 }
 
 /* ══════════════════════════════════════
@@ -107,6 +188,7 @@ async function initAuth() {
   const doLogin = async () => {
     const val = $('loginPasswordInput').value;
     const btn = $('loginBtn');
+    const remember = $('loginRememberInput')?.checked ?? true;
     if (!val) { $('loginError').textContent = 'Please enter a password.'; return; }
 
     $('loginError').textContent = '';
@@ -115,10 +197,9 @@ async function initAuth() {
     try {
       const payload = await requestJson('/admin/login', {
         method: 'POST',
-        data: { password: val },
+        data: { password: val, remember },
         headers: { 'Content-Type': 'application/json' }
       });
-      $('loginPasswordInput').value = '';
       showDashboard(payload.data || {});
     } catch (error) {
       $('loginError').textContent = error.message || 'Login failed.';
@@ -132,6 +213,7 @@ async function initAuth() {
 
   // Logout
   $('logoutBtn').addEventListener('click', async () => {
+    stopSessionKeepAlive();
     try {
       await requestJson('/admin/logout', {
         method: 'POST',

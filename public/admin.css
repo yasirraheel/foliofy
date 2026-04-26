@@ -120,6 +120,35 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 .login-input-wrap button { padding: 0 14px; color: var(--text-muted); background: none; border: none; cursor: pointer; }
 .login-input-wrap button:hover { color: var(--primary); }
 
+.login-session-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.login-remember {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.login-remember input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary);
+}
+
+.login-helper-text {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
 .login-error {
   color: var(--danger); font-size: 0.85rem; min-height: 20px;
   display: flex; align-items: center; gap: 6px;

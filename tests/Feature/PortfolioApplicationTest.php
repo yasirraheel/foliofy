@@ -8,6 +8,7 @@ use Database\Seeders\PortfolioDataSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
@@ -185,7 +186,15 @@ class PortfolioApplicationTest extends TestCase
                 'user' => null,
             ]);
 
-        $this->postJson('/admin/login', ['password' => 'secret123'])
+        $this->getJson('/admin/ping')
+            ->assertStatus(401);
+
+        $loginResponse = $this->postJson('/admin/login', [
+            'password' => 'secret123',
+            'remember' => true,
+        ]);
+
+        $loginResponse
             ->assertOk()
             ->assertJson([
                 'success' => true,
@@ -194,6 +203,7 @@ class PortfolioApplicationTest extends TestCase
                     'email' => $admin->email,
                 ],
             ]);
+        $loginResponse->assertCookie(Auth::guard()->getRecallerName());
 
         $this->getJson('/admin/bootstrap')
             ->assertOk()
@@ -203,6 +213,12 @@ class PortfolioApplicationTest extends TestCase
                     'id' => $admin->id,
                     'email' => $admin->email,
                 ],
+            ]);
+
+        $this->getJson('/admin/ping')
+            ->assertOk()
+            ->assertJson([
+                'authenticated' => true,
             ]);
 
         $this->postJson('/admin/password', [

@@ -32,6 +32,13 @@
           <i class="fas fa-eye" id="loginEyeIcon"></i>
         </button>
       </div>
+      <div class="login-session-row">
+        <label class="login-remember">
+          <input type="checkbox" id="loginRememberInput" checked />
+          <span>Keep me signed in on this device</span>
+        </label>
+        <span class="login-helper-text">Recommended on your personal device</span>
+      </div>
       <p class="login-error" id="loginError"></p>
       <button class="login-btn" id="loginBtn">
         <span>Login to Dashboard</span>
